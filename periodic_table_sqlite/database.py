@@ -11,7 +11,7 @@ from . import (
     WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
 )
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 metadata_obj = MetaData()
 
@@ -56,41 +56,45 @@ def create_db(engine: Engine, metadata_obj: MetaData = metadata_obj):
     metadata_obj.create_all(engine)
 
     with engine.connect() as conn:
-        # Create the options in the atomic weight type table
-        at_weight_values = [
-            {
-                "name": WEIGHT_TYPE_NONE,
-                "method": "none",
-                "reason": "No stable isotope(s) with characteristic isotopic "
-                          "composition exist. A standard atomic weight cannot "
-                          "be determined."
-            },
-            {
-                "name": WEIGHT_TYPE_INTERVAL,
-                "method": "calculated",
-                "reason": "CIAAW expresses atomic weight as an interval "
-                          "intended to encompass all \"normal\" materials. "
-                          "Atomic weight has been calculated as the midpoint "
-                          "of the interval; uncertainty is calculated as half "
-                          "the difference between the maximum and minimum of "
-                          "the interval."
-            },
-            {
-                "name": WEIGHT_TYPE_REPORTED,
-                "method": "tabulated",
-                "reason": "CIAAW provides a single value for the atomic "
-                          "weight with an uncertainty. The quoted atomic "
-                          "weight is representative of the population of a "
-                          "sample of atoms of the element. A minimum and "
-                          "maximum weight have been calculated from the "
-                          "uncertainty."
-            }
-        ]
-        logger.info(f"Adding weight types to {atomic_weight_type.name} table.")
-        conn.execute(
-            insert(atomic_weight_type), at_weight_values
-        )
-        conn.commit()
+        add_atomic_weight_types(conn)
+
+
+def add_atomic_weight_types(conn: Connection):
+    """
+    Create the constants in the atomic weight type table.
+    """
+    at_weight_values = [
+        {
+            "name": WEIGHT_TYPE_NONE,
+            "method": "none",
+            "reason": "No stable isotope(s) with characteristic isotopic "
+                      "composition exist. A standard atomic weight cannot "
+                      "be determined."
+        },
+        {
+            "name": WEIGHT_TYPE_INTERVAL,
+            "method": "calculated",
+            "reason": "CIAAW expresses atomic weight as an interval intended "
+                      "to encompass all \"normal\" materials. Atomic weight "
+                      "has been calculated as the midpoint of the interval; "
+                      "uncertainty is calculated as half the difference "
+                      "between the maximum and minimum of the interval."
+        },
+        {
+            "name": WEIGHT_TYPE_REPORTED,
+            "method": "tabulated",
+            "reason": "CIAAW provides a single value for the atomic weight "
+                      "with an uncertainty. The quoted atomic weight is "
+                      "representative of the population of a sample of atoms "
+                      "of the element. A minimum and maximum weight have "
+                      "been calculated from the uncertainty."
+        }
+    ]
+    logger.info(f"Adding weight types to {atomic_weight_type.name} table.")
+    conn.execute(
+        insert(atomic_weight_type), at_weight_values
+    )
+    conn.commit()
 
 
 def get_weight_type_ids(conn: Connection) -> dict[str, int]:
