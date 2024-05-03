@@ -42,12 +42,11 @@ atomic_weight_type = Table(
 )
 
 
-def create_db(engine: Engine):
+def create_db(engine: Engine, metadata_obj: MetaData = metadata_obj):
     """
     Initialises the elements database.
 
-    Returns a dictionary containing the name:id mappings of
-    atomic_weight_types and the id of the "none" atomic weight
+    Adds the three methods used to determine/report atomic weights.
     """
     metadata_obj.create_all(engine)
 
@@ -84,6 +83,10 @@ def create_db(engine: Engine):
 
 
 def get_weight_type_ids(conn: Connection) -> dict[str, int]:
+    """
+    Returns a mapping of the name of the method used to determine/state the
+    atomic weight of an element to its database id.
+    """
     weight_type_ids_stmt = (
         select(atomic_weight_type.c.name, atomic_weight_type.c.id)
     )
@@ -95,7 +98,9 @@ def get_weight_type_ids(conn: Connection) -> dict[str, int]:
 
 
 def get_none_weight_id(conn: Connection) -> int:
-    # TODO Add scalar subq to get non_type_id
+    """
+    Returns the database id of the atomic weight stated as "None".
+    """
     none_weight_id_stmt = (
         select(atomic_weight, atomic_weight_type)
         .join(atomic_weight_type)
@@ -109,13 +114,17 @@ def get_none_weight_id(conn: Connection) -> int:
 
 
 def add_elements(conn: Connection, elements: list[Element]):
+    """
+    Adds elements and their atomic weights to database, based on a list of
+    elements supplied to the function.
+    """
     element_values = []
     weight_values = []
 
     for elem in elements:
         el = elem.dict()
         weight = el.pop("weight")
-        el["weight"] = weight["weight"]  # if weight["weight"] else -1
+        el["weight"] = weight["weight"]
         el["weight_type"] = weight["weight_type"]
         element_values.append(el)
         if weight not in weight_values:
