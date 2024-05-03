@@ -140,6 +140,7 @@ def add_elements(conn: Connection, elements: list[Element]):
         insert(atomic_weight).values(weight_type_id=weight_type_subq)
     )
     conn.execute(weights_insert_stmt, weight_values)
+    conn.commit()
 
     # Insert the elements
     # Use subquery to associate the weights with each element
@@ -162,3 +163,4 @@ def add_elements(conn: Connection, elements: list[Element]):
         insert(element).values(atomic_weight_id=weight_subq)
     )
     conn.execute(elements_insert_stmt, element_values)
+    conn.commit()
