@@ -23,12 +23,16 @@ class RawElement:
     atomic_weight_tabulated: list[str]
 
 
-def get_raw_elements(url: str) -> list[RawElement]:
+def get_elements_text(url: str) -> list[RawElement]:
+    """
+    Returns list of elements with properties in form of text scraped from a
+    given URL.
+    """
     logger.info(f"Getting URL: {url}")
     html = requests.get(url)
     soup = BeautifulSoup(html.text, "html.parser")
 
-    logger.info("Processing element rows...")
+    logger.info("Processing element rows.")
     raw_elements = []
     element_rows = soup.find("table").tbody.find_all("tr")
     for elem in element_rows:
@@ -50,11 +54,18 @@ def get_raw_elements(url: str) -> list[RawElement]:
     return raw_elements
 
 
-def get_elements(raw_elements: list[RawElement]) -> list[Element]:
+def parse_elements_text(raw_elements: list[RawElement]) -> list[Element]:
+    """
+    Returns a list of elements with properties with types as required for
+    database entries.
+    """
 
-    def get_precision(value: str):
-        # Find number of figures after dp
-        return len(value.split(".")[1])
+    def get_precision(number: str):
+        """
+        Returns the number of digits after the decimal place for a string
+        representing a number.
+        """
+        return len(number.split(".")[1])
 
     # regex to differentiate one and no weight
     one_weight_regex = re.compile(r"(\d*\.\d*)\((\d\d?)\)")
@@ -65,6 +76,7 @@ def get_elements(raw_elements: list[RawElement]) -> list[Element]:
                     weight_max=None, weight_type=WEIGHT_TYPE_NONE
                 )
 
+    logger.info("Processing scraped text to element properties.")
     elements = []
     for raw in raw_elements:
 
@@ -83,6 +95,8 @@ def get_elements(raw_elements: list[RawElement]) -> list[Element]:
                 weight_max=weight_max,
                 weight_type=WEIGHT_TYPE_INTERVAL
             )
+            logger.debug(f"Element '{raw.symbol}' atomic weight quoted as "
+                         f"'{WEIGHT_TYPE_INTERVAL}' type. Weight calculated.")
 
         elif len(raw.atomic_weight_tabulated) == 1:
             # Atomic weight quoted either as a best value or none
@@ -92,6 +106,9 @@ def get_elements(raw_elements: list[RawElement]) -> list[Element]:
             # N.B. next line: em-dash, not a hyphen!
             if not mtch and raw.atomic_weight_tabulated[0] == "—":
                 at_weight = NO_WEIGHT
+                logger.debug(f"Element '{raw.symbol}' atomic weight is "
+                             f"'{WEIGHT_TYPE_NONE}' type. Assigned to 'None' "
+                             "weight.")
 
             else:
                 weight = float(mtch.group(1))
@@ -105,6 +122,9 @@ def get_elements(raw_elements: list[RawElement]) -> list[Element]:
                     weight_max=round(weight + esd, prec),
                     weight_type=WEIGHT_TYPE_REPORTED
                 )
+                logger.debug(f"Element '{raw.symbol}' atomic weight is "
+                             f"'{WEIGHT_TYPE_REPORTED}' type. Weight min and "
+                             "max calculated.")
 
         elements.append(Element(
             atomic_number=raw.atomic_nr,
@@ -117,5 +137,9 @@ def get_elements(raw_elements: list[RawElement]) -> list[Element]:
 
 
 def parse_table():
-    raw_elements = get_raw_elements(PERIODIC_TABLE_URL)
-    return get_elements(raw_elements)
+    """
+    Entry point for table parsing on PERIODIC_TABLE_URL website; returns
+    parsed list of elements.
+    """
+    raw_elements = get_elements_text(PERIODIC_TABLE_URL)
+    return parse_elements_text(raw_elements)
