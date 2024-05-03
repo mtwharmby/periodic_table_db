@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy import (MetaData, Table, Column, Float, Integer, String,
                         ForeignKey, Engine, insert, select, Connection,
                         bindparam, null, or_)
@@ -8,6 +10,8 @@ from . import (
     AT_WEIGHT_ESD, AT_WEIGHT_MIN, AT_WEIGHT_MAX, AT_WEIGHT_TYPE_ID,
     WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
 )
+
+logger = logging.getLogger()
 
 metadata_obj = MetaData()
 
@@ -48,6 +52,7 @@ def create_db(engine: Engine, metadata_obj: MetaData = metadata_obj):
 
     Adds the three methods used to determine/report atomic weights.
     """
+    logger.info("Initialising database.")
     metadata_obj.create_all(engine)
 
     with engine.connect() as conn:
@@ -76,6 +81,7 @@ def create_db(engine: Engine, metadata_obj: MetaData = metadata_obj):
                           "based on the distribution of stable isotopes."
             }
         ]
+        logger.info(f"Adding weight types to {atomic_weight_type.name} table.")
         conn.execute(
             insert(atomic_weight_type), at_weight_values
         )
@@ -139,6 +145,8 @@ def add_elements(conn: Connection, elements: list[Element]):
     weights_insert_stmt = (
         insert(atomic_weight).values(weight_type_id=weight_type_subq)
     )
+    logger.info(f"Adding {len(weight_values)} atomic weight entries to "
+                f"{atomic_weight.name} table.")
     conn.execute(weights_insert_stmt, weight_values)
     conn.commit()
 
@@ -162,5 +170,7 @@ def add_elements(conn: Connection, elements: list[Element]):
     elements_insert_stmt = (
         insert(element).values(atomic_weight_id=weight_subq)
     )
+    logger.info(f"Adding {len(element_values)} element entries to "
+                f"{element.name} table.")
     conn.execute(elements_insert_stmt, element_values)
     conn.commit()
