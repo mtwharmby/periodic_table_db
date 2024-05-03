@@ -22,5 +22,8 @@ dependencies = [
 ]
 dynamic = ["version", ]
 
+[project.scripts]
+create-pt-db = "periodic_table_sqlite.generate_database:main"
+
 [tool.setuptools.dynamic]
 version = { attr = "periodic_table_sqlite.__init__.VERSION" }

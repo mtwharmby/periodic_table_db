@@ -1,6 +1,22 @@
 # Periodic Table (SQLite)
 Python module for generating an SQLite database containing the elements of the periodic table, their relative atomic masses and other properties.
 
+## Creating the Database
+A periodic table database, stored in an SQLite database file, can be created using a command-line instruction after installing the python module:
+```sh
+% pip install periodic_table_sqlite
+...
+% create-pt-db --db-path <path to an existing directory>
+```
+Details of the arguments that can be supplied to `create-pt-db` can be found by running:
+```sh
+% create-pt-db --help
+```
+Running the create-pt-db script without the `--db-path` argument will briefly create an in-memory database (useful for debugging...!). 
+
+### Use as a Library
+The functions in the module are (hopefully) also written in a way that they can be used with [SQLAlchemy](https://www.sqlalchemy.org/) to create the tables for a periodic table database in another database. See the module `generate_database.py` for an example of how this might be done.
+
 ## Data
 ### Atomic Weights
 Data are obtained from the IUPAC Comission on Isotopic Abundances and Atomic Weights (CIAAW website). A description of the uncertainties is provided by [Possolo *et al.*, Pure Appl. Chem., 90 (2018), 395-424](https://www.degruyter.com/document/doi/10.1515/pac-2016-0402/html).
