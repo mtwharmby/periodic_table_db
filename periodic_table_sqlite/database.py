@@ -71,14 +71,19 @@ def create_db(engine: Engine, metadata_obj: MetaData = metadata_obj):
                 "reason": "CIAAW expresses atomic weight as an interval "
                           "intended to encompass all \"normal\" materials. "
                           "Atomic weight has been calculated as the midpoint "
-                          "of the interval; ESD is the difference between the "
-                          "weight and either of the extrema of the interval."
+                          "of the interval; uncertainty is calculated as half "
+                          "the difference between the maximum and minimum of "
+                          "the interval."
             },
             {
                 "name": WEIGHT_TYPE_REPORTED,
-                "method": "reported",
-                "reason": "CIAAW provides a best estimate for atomic mass, "
-                          "based on the distribution of stable isotopes."
+                "method": "tabulated",
+                "reason": "CIAAW provides a single value for the atomic "
+                          "weight with an uncertainty. The quoted atomic "
+                          "weight is representative of the population of a "
+                          "sample of atoms of the element. A minimum and "
+                          "maximum weight have been calculated from the "
+                          "uncertainty."
             }
         ]
         logger.info(f"Adding weight types to {atomic_weight_type.name} table.")
