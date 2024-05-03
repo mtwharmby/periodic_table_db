@@ -1,3 +1,4 @@
+import argparse
 import logging
 from pathlib import Path
 import sys
@@ -11,7 +12,7 @@ from periodic_table_sqlite.www_table_parser import parse_table
 logger = logging.getLogger(__name__)
 
 
-def main(db_path: Path = None, interactive: bool = True):
+def generate_db(db_path: Path = None, interactive: bool = True):
     if db_path:
         db_path = db_path.resolve()
         if db_path.exists():
@@ -39,5 +40,38 @@ def main(db_path: Path = None, interactive: bool = True):
         add_elements(conn, elements)
 
 
+def main(interactive=True):
+    logging.basicConfig(level=logging.INFO)
+    kwargs = {}
+
+    if interactive:
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--db-path", type=Path,
+            help="Directory where periodic table SQLite database file will be "
+                 "created."
+        )
+        parser.add_argument(
+            "--debug", action="store_true",
+            help="Enable debug log output"
+        )
+
+        args = parser.parse_args()
+
+        if args.db_path:
+            if args.db_path.exists() and args.db_path.is_dir():
+                db_path: Path = args.db_path / "periodic_table.sqlite"
+                kwargs["db_path"] = db_path
+            else:
+                print(f"ERROR: Path '{args.db_path}' does not exist or is "
+                      "not a directory.\n")
+                sys.exit(1)
+
+        if args.debug:
+            logging.getLogger().setLevel(logging.DEBUG)
+
+    generate_db(interactive=interactive, **kwargs)
+
+
 if __name__ == "__main__":
-    main(interactive=False)
+    main(interactive=True)
