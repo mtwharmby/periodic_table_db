@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "periodic_table_sqlite"
+authors = [
+    { name="Michael Wharmby", email="mt@wharmby.org.uk" },
+]
+description = "Python module for generating an SQLite database & JSON files containing the elements of the periodic table."
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "beautifulsoup4>=4.12",
+    "requests>=2.31",
+    "SQLAlchemy>=2.0"
+]
+dynamic = ["version", ]
+
+[tool.setuptools.dynamic]
+version = { attr = "periodic_table_sqlite.__init__.VERSION" }
