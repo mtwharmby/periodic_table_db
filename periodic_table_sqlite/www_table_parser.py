@@ -23,14 +23,11 @@ class RawElement:
     atomic_weight_tabulated: list[str]
 
 
-def get_elements_text(url: str) -> list[RawElement]:
+def get_elements_from_html(resp: requests.Response) -> list[RawElement]:
     """
-    Returns list of elements with properties in form of text scraped from a
-    given URL.
+    Returns list of elements with string properties from supplied html reponse.
     """
-    logger.info(f"Getting URL: {url}")
-    html = requests.get(url)
-    soup = BeautifulSoup(html.text, "html.parser")
+    soup = BeautifulSoup(resp.text, "html.parser")
 
     logger.info("Processing element rows.")
     raw_elements = []
@@ -136,10 +133,12 @@ def parse_elements_text(raw_elements: list[RawElement]) -> list[Element]:
     return elements
 
 
-def parse_table():
+def parse_table(url: str = PERIODIC_TABLE_URL):
     """
     Entry point for table parsing on PERIODIC_TABLE_URL website; returns
     parsed list of elements.
     """
-    raw_elements = get_elements_text(PERIODIC_TABLE_URL)
+    logger.info(f"Getting URL: {url}")
+    html = requests.get(url)
+    raw_elements = get_elements_from_html(html)
     return parse_elements_text(raw_elements)
