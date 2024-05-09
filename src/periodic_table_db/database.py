@@ -16,16 +16,16 @@ logger = logging.getLogger(__name__)
 metadata_obj = MetaData()
 
 element = Table(
-    "element",
+    "Element",
     metadata_obj,
     Column(ATOMIC_NR, Integer, primary_key=True),
     Column(ELEM_SYMBOL, String, nullable=False, unique=True),
     Column(ELEM_NAME, String, nullable=False, unique=True),
-    Column(ELEM_WEIGHT_ID, Integer, ForeignKey("atomic_weight.id"))
+    Column(ELEM_WEIGHT_ID, Integer, ForeignKey("AtomicWeight.id"))
 )
 
 atomic_weight = Table(
-    "atomic_weight",
+    "AtomicWeight",
     metadata_obj,
     Column("id", Integer, primary_key=True),
     Column(AT_WEIGHT, Float, nullable=True, unique=True),
@@ -33,11 +33,11 @@ atomic_weight = Table(
     Column(AT_WEIGHT_ESD, Float),
     Column(AT_WEIGHT_MIN, Float),
     Column(AT_WEIGHT_MAX, Float),
-    Column(AT_WEIGHT_TYPE_ID, Integer, ForeignKey("atomic_weight_type.id"))
+    Column(AT_WEIGHT_TYPE_ID, Integer, ForeignKey("AtomicWeightType.id"))
 )
 
 atomic_weight_type = Table(
-    "atomic_weight_type",
+    "AtomicWeightType",
     metadata_obj,
     Column("id", Integer, primary_key=True),
     Column("name", String, nullable=False),
