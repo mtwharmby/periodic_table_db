@@ -3,9 +3,9 @@ import logging
 from pathlib import Path
 import sys
 
-from sqlalchemy import create_engine
+from sqlalchemy import MetaData
 
-from periodic_table_db.database import create_db, add_elements
+from periodic_table_db.database import PeriodicTableDB
 from periodic_table_db.www_table_parser import parse_table
 
 
@@ -30,14 +30,13 @@ def generate_db(db_path: Path = None, interactive: bool = True):
         db_url = "sqlite:///:memory:"
 
     # Initialise the database
-    engine = create_engine(db_url)
-    create_db(engine)
+    pt_db = PeriodicTableDB(db_url, MetaData())
+    pt_db.create_db()
 
     # Get elements from CIAAW website...
     elements = parse_table()
     # ... and put them in the database
-    with engine.connect() as conn:
-        add_elements(conn, elements)
+    pt_db.add_elements(elements)
 
 
 def main(interactive=True):

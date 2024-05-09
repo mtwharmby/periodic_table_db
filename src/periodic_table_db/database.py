@@ -1,109 +1,151 @@
 import logging
 
-from sqlalchemy import (MetaData, Table, Column, Float, Integer, String,
-                        ForeignKey, Engine, insert, select, Connection,
-                        bindparam, null, or_)
+from sqlalchemy import (
+    MetaData, insert, select, Connection, bindparam, null, or_, create_engine,
+)
 
 from . import (
-    Element,
-    ATOMIC_NR, ELEM_SYMBOL, ELEM_NAME, ELEM_WEIGHT_ID, AT_WEIGHT,
-    AT_WEIGHT_ESD, AT_WEIGHT_MIN, AT_WEIGHT_MAX, AT_WEIGHT_TYPE_ID,
-    WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
+    Element, WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
+)
+from .base import (
+    element_table, atomic_weight_table, atomic_weight_type_table
 )
 
 logger = logging.getLogger(__name__)
 
-metadata_obj = MetaData()
 
-element = Table(
-    "Element",
-    metadata_obj,
-    Column(ATOMIC_NR, Integer, primary_key=True),
-    Column(ELEM_SYMBOL, String, nullable=False, unique=True),
-    Column(ELEM_NAME, String, nullable=False, unique=True),
-    Column(ELEM_WEIGHT_ID, Integer, ForeignKey("AtomicWeight.id"))
-)
+class PeriodicTableDB:
 
-atomic_weight = Table(
-    "AtomicWeight",
-    metadata_obj,
-    Column("id", Integer, primary_key=True),
-    Column(AT_WEIGHT, Float, nullable=True, unique=True),
-    # Null OK - no defined weight; we expect each element to have own weight
-    Column(AT_WEIGHT_ESD, Float),
-    Column(AT_WEIGHT_MIN, Float),
-    Column(AT_WEIGHT_MAX, Float),
-    Column(AT_WEIGHT_TYPE_ID, Integer, ForeignKey("AtomicWeightType.id"))
-)
+    def __init__(self, db_url: str, md: MetaData) -> None:
+        self.metadata_obj = md
+        self.engine = create_engine(db_url)
+        self.element = element_table(self.metadata_obj, extended=False)
+        self.atomic_weight = atomic_weight_table(self.metadata_obj)
+        self.atomic_weight_type = atomic_weight_type_table(self.metadata_obj)
 
-atomic_weight_type = Table(
-    "AtomicWeightType",
-    metadata_obj,
-    Column("id", Integer, primary_key=True),
-    Column("name", String, nullable=False),
-    Column("method", String, nullable=False),
-    Column("reason", String, nullable=False)
-)
+    def create_db(self):
+        """
+        Initialises the elements database.
+
+        Adds the three methods used to determine/report atomic weights.
+        """
+        logger.info("Initialising database.")
+        self.metadata_obj.create_all(self.engine)
+
+        with self.engine.connect() as conn:
+            self.add_atomic_weight_types(conn)
+
+    def add_atomic_weight_types(self, conn: Connection):
+        """
+        Create the constants in the atomic weight type table.
+        """
+        at_weight_values = [
+            {
+                "name": WEIGHT_TYPE_NONE,
+                "method": "none",
+                "reason": "No stable isotope(s) with characteristic isotopic "
+                          "composition exist. A standard atomic weight cannot "
+                          "be determined."
+            },
+            {
+                "name": WEIGHT_TYPE_INTERVAL,
+                "method": "calculated",
+                "reason": "CIAAW expresses atomic weight as an interval "
+                          "intended to encompass all \"normal\" materials. "
+                          "Atomic weight has been calculated as the midpoint "
+                          "of the interval; uncertainty is calculated as half "
+                          "the difference between the maximum and minimum of "
+                          "the interval."
+            },
+            {
+                "name": WEIGHT_TYPE_REPORTED,
+                "method": "tabulated",
+                "reason": "CIAAW provides a single value for the atomic "
+                          "weight with an uncertainty. The quoted atomic "
+                          "weight is representative of the population of a "
+                          "sample of atoms of the element. A minimum and "
+                          "maximum weight have been calculated from the "
+                          "uncertainty."
+            }
+        ]
+        logger.info(
+            f"Adding weight types to {self.atomic_weight_type.name} table."
+        )
+        conn.execute(
+            insert(self.atomic_weight_type), at_weight_values
+        )
+        conn.commit()
+
+    def add_elements(self, elements: list[Element]):
+        """
+        Adds elements and their atomic weights to database, based on a list of
+        elements supplied to the function.
+        """
+        with self.engine.connect() as conn:
+            element_values = []
+            weight_values = []
+
+            for elem in elements:
+                el = elem.dict()
+                weight = el.pop("weight")
+                el["weight"] = weight["weight"]
+                el["weight_type"] = weight["weight_type"]
+                element_values.append(el)
+                if weight not in weight_values:
+                    weight_values.append(weight)
+
+            # Insert the atomic weights
+            # Use subquery to associate weight types with each weight
+            weight_type_subq = (
+                select(self.atomic_weight_type.c.id)
+                .where(self.atomic_weight_type.c.name
+                       == bindparam("weight_type"))
+            )
+            weights_insert_stmt = (
+                insert(self.atomic_weight)
+                .values(weight_type_id=weight_type_subq)
+            )
+            logger.info(f"Adding {len(weight_values)} atomic weight entries "
+                        f"to {self.atomic_weight.name} table.")
+            conn.execute(weights_insert_stmt, weight_values)
+            conn.commit()
+
+            # Insert the elements
+            # Use subquery to associate the weights with each element
+            weight_subq = (
+                select(self.atomic_weight.c.id)
+                .join(self.atomic_weight_type)
+                .where(
+                    self.atomic_weight_type.c.name == bindparam("weight_type"),
+                    or_(
+                        self.atomic_weight.c.weight == bindparam("weight"),
+                        self.atomic_weight.c.weight == null(),
+                    )
+                )
+            )
+            # or_ statement needed above, since bindparam returns "col = None"
+            # rather than "col IS NULL". This is a variation on this:
+            #     https://stackoverflow.com/q/21668606
+            # There's probably a neater solution using a TypeDecorator, but
+            # this works
+            elements_insert_stmt = (
+                insert(self.element).values(atomic_weight_id=weight_subq)
+            )
+            logger.info(f"Adding {len(element_values)} element entries to "
+                        f"{self.element.name} table.")
+            conn.execute(elements_insert_stmt, element_values)
+            conn.commit()
 
 
-def create_db(engine: Engine, metadata_obj: MetaData = metadata_obj):
-    """
-    Initialises the elements database.
-
-    Adds the three methods used to determine/report atomic weights.
-    """
-    logger.info("Initialising database.")
-    metadata_obj.create_all(engine)
-
-    with engine.connect() as conn:
-        add_atomic_weight_types(conn)
-
-
-def add_atomic_weight_types(conn: Connection):
-    """
-    Create the constants in the atomic weight type table.
-    """
-    at_weight_values = [
-        {
-            "name": WEIGHT_TYPE_NONE,
-            "method": "none",
-            "reason": "No stable isotope(s) with characteristic isotopic "
-                      "composition exist. A standard atomic weight cannot "
-                      "be determined."
-        },
-        {
-            "name": WEIGHT_TYPE_INTERVAL,
-            "method": "calculated",
-            "reason": "CIAAW expresses atomic weight as an interval intended "
-                      "to encompass all \"normal\" materials. Atomic weight "
-                      "has been calculated as the midpoint of the interval; "
-                      "uncertainty is calculated as half the difference "
-                      "between the maximum and minimum of the interval."
-        },
-        {
-            "name": WEIGHT_TYPE_REPORTED,
-            "method": "tabulated",
-            "reason": "CIAAW provides a single value for the atomic weight "
-                      "with an uncertainty. The quoted atomic weight is "
-                      "representative of the population of a sample of atoms "
-                      "of the element. A minimum and maximum weight have "
-                      "been calculated from the uncertainty."
-        }
-    ]
-    logger.info(f"Adding weight types to {atomic_weight_type.name} table.")
-    conn.execute(
-        insert(atomic_weight_type), at_weight_values
-    )
-    conn.commit()
-
-
-def get_weight_type_ids(conn: Connection) -> dict[str, int]:
+def get_weight_type_ids(
+        db: PeriodicTableDB, conn: Connection
+        ) -> dict[str, int]:
     """
     Returns a mapping of the name of the method used to determine/state the
     atomic weight of an element to its database id.
     """
     weight_type_ids_stmt = (
-        select(atomic_weight_type.c.name, atomic_weight_type.c.id)
+        select(db.atomic_weight_type.c.name, db.atomic_weight_type.c.id)
     )
     weight_type_ids_res = conn.execute(weight_type_ids_stmt)
     weight_type_ids = [row._mapping for row in weight_type_ids_res]
@@ -112,74 +154,17 @@ def get_weight_type_ids(conn: Connection) -> dict[str, int]:
     }
 
 
-def get_none_weight_id(conn: Connection) -> int:
+def get_none_weight_id(db: PeriodicTableDB, conn: Connection) -> int:
     """
     Returns the database id of the atomic weight stated as "None".
     """
     none_weight_id_stmt = (
-        select(atomic_weight, atomic_weight_type)
-        .join(atomic_weight_type)
+        select(db.atomic_weight, db.atomic_weight_type)
+        .join(db.atomic_weight_type)
         .where(
-            atomic_weight.c.weight == null(),
-            atomic_weight_type.c.name == WEIGHT_TYPE_NONE
+            db.atomic_weight.c.weight == null(),
+            db.atomic_weight_type.c.name == WEIGHT_TYPE_NONE
         )
     )
     none_weight_id_res = conn.execute(none_weight_id_stmt)
     return none_weight_id_res.scalar_one()
-
-
-def add_elements(conn: Connection, elements: list[Element]):
-    """
-    Adds elements and their atomic weights to database, based on a list of
-    elements supplied to the function.
-    """
-    element_values = []
-    weight_values = []
-
-    for elem in elements:
-        el = elem.dict()
-        weight = el.pop("weight")
-        el["weight"] = weight["weight"]
-        el["weight_type"] = weight["weight_type"]
-        element_values.append(el)
-        if weight not in weight_values:
-            weight_values.append(weight)
-
-    # Insert the atomic weights
-    # Use subquery to associate weight types with each weight
-    weight_type_subq = (
-        select(atomic_weight_type.c.id)
-        .where(atomic_weight_type.c.name == bindparam("weight_type"))
-    )
-    weights_insert_stmt = (
-        insert(atomic_weight).values(weight_type_id=weight_type_subq)
-    )
-    logger.info(f"Adding {len(weight_values)} atomic weight entries to "
-                f"{atomic_weight.name} table.")
-    conn.execute(weights_insert_stmt, weight_values)
-    conn.commit()
-
-    # Insert the elements
-    # Use subquery to associate the weights with each element
-    weight_subq = (
-        select(atomic_weight.c.id)
-        .join(atomic_weight_type)
-        .where(
-            atomic_weight_type.c.name == bindparam("weight_type"),
-            or_(
-                atomic_weight.c.weight == bindparam("weight"),
-                atomic_weight.c.weight == null(),
-            )
-        )
-    )
-    # or_ statement needed above, since bindparam returns "col = None" rather
-    # than "col IS NULL". This is a variation on this:
-    #     https://stackoverflow.com/q/21668606
-    # There's probably a neater solution using a TypeDecorator, but this works
-    elements_insert_stmt = (
-        insert(element).values(atomic_weight_id=weight_subq)
-    )
-    logger.info(f"Adding {len(element_values)} element entries to "
-                f"{element.name} table.")
-    conn.execute(elements_insert_stmt, element_values)
-    conn.commit()
