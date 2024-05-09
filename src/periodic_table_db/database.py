@@ -7,7 +7,7 @@ from sqlalchemy import (
 from . import (
     Element, WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
 )
-from .base import (
+from .schema import (
     element_table, atomic_weight_table, atomic_weight_type_table
 )
 
