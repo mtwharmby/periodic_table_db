@@ -23,7 +23,7 @@ dependencies = [
 dynamic = ["version", ]
 
 [project.scripts]
-create-pt-db = "periodic_table_db.generate_database:main"
+create-pt-db = "generate_database:main"
 
 [tool.setuptools.dynamic]
 version = { attr = "periodic_table_db.__init__.VERSION" }
