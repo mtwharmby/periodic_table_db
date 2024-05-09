@@ -1,5 +1,5 @@
-# Periodic Table (SQLite)
-Python module for generating an SQLite database containing the elements of the periodic table, their relative atomic masses and other properties.
+# Periodic Table Database
+Python module for generating a (SQLite) database containing the elements of the periodic table, their relative atomic masses and other properties.
 
 ## Creating the Database
 A periodic table database, stored in an SQLite database file, can be created using a command-line instruction after installing the python module:

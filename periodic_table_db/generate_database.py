@@ -5,8 +5,8 @@ import sys
 
 from sqlalchemy import create_engine
 
-from periodic_table_sqlite.database import create_db, add_elements
-from periodic_table_sqlite.www_table_parser import parse_table
+from periodic_table_db.database import create_db, add_elements
+from periodic_table_db.www_table_parser import parse_table
 
 
 logger = logging.getLogger(__name__)

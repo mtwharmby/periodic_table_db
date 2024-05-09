@@ -3,11 +3,11 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "periodic_table_sqlite"
+name = "periodic_table_db"
 authors = [
     { name="Michael Wharmby", email="mt@wharmby.org.uk" },
 ]
-description = "Python module for generating an SQLite database & JSON files containing the elements of the periodic table."
+description = "Python module for generating a (SQLite) database & JSON files containing the elements of the periodic table."
 readme = "README.md"
 requires-python = ">=3.11"
 classifiers = [
@@ -23,7 +23,7 @@ dependencies = [
 dynamic = ["version", ]
 
 [project.scripts]
-create-pt-db = "periodic_table_sqlite.generate_database:main"
+create-pt-db = "periodic_table_db.generate_database:main"
 
 [tool.setuptools.dynamic]
-version = { attr = "periodic_table_sqlite.__init__.VERSION" }
+version = { attr = "periodic_table_db.__init__.VERSION" }
