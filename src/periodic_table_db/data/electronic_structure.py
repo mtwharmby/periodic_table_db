@@ -9,17 +9,49 @@ NON_NUMERIC_GROUP_NAMES = {
 }
 
 
+# TODO Needs testing
+# TODO Write tests for all!
+
+
 class SubShell:
 
     MAX_E_ORBITAL = 2
 
     def __init__(self, pqn: int, aqn: int) -> None:
+        """
+        A representation of the orbitals making up a sub-shell in an atom.
+
+        The number of sub-shells to create is determined from the azimuthal
+        quantum number (l) provided (the magnetic quantum number, m_l of the
+        orbitals in the sub-shell varies from -l to l).
+
+        The name of the sub-shell is determined from the principal quantum
+        number with the letter code derived from the azimuthal quantum number.
+
+        The number of electrons that can be allocated to each orbital is
+        limited by the MAX_E_ORBITAL variable.
+        """
         self.orbitals = [0] * len(range(-aqn, aqn + 1))
         self.name = f"{pqn}{AZIMUTHAL_QUANTUM_NUMBER[aqn]}"
         self._pqn = pqn
         self._aqn = aqn
 
-    def populate(self, population):
+    def populate(
+            self, population: dict[str, int | list[tuple[int, int]]]
+            ) -> dict[str, int | list[tuple[int, int]]]:
+        """
+        Fill orbitals with electrons.
+
+        Electrons are provided from a dictionary containing the keyword
+        "electrons". Electrons are distributed equally across all orbitals,
+        first with one electron per orbital, then with a second.
+        Each orbital can only hold two electrons.
+
+        Remaining electrons are returned in the dictionary. The principal and
+        azimuthal quantum numbers of the sub-shell are added to the "sequence"
+        entry if electrons were added to allow the sub-shell filling sequence
+        to be determined.
+        """
 
         while (population["electrons"] and not self.is_full):
             #    and self.electrons < len(self.orbitals) * self.MAX_E_ORBITAL):
@@ -29,9 +61,6 @@ class SubShell:
                     self.orbitals[i] += 1
                     population["electrons"] -= 1
 
-            # # Set this sub-shell's AQN as the last AQN to populate the atom
-            # population["aqn"] = self._aqn
-
         if bool(sum(self.orbitals)):
             # Only add to the sequence if some electrons added to the sub-shell
             population["sequence"].append((self._pqn, self._aqn))
@@ -40,15 +69,24 @@ class SubShell:
 
     @property
     def electrons(self):
+        """
+        Total number of electrons (over all orbitals) in this sub-shell.
+        """
         return sum(self.orbitals)
 
     @property
     def is_full(self):
+        """
+        True if all the orbitals in this sub-shell are filled.
+        """
         return self.electrons == len(self.orbitals) * self.MAX_E_ORBITAL
 
     def __repr__(self) -> str:
         e_config = ", ".join(map(str, self.orbitals))
         return f"<SubShell: {self.name} ({e_config})>"
+
+    def __str__(self) -> str:
+        return f"{self.name}{{^{self.electrons}}}"
 
 
 class Atom:
@@ -58,7 +96,7 @@ class Atom:
         Create a representation of the electronic structure of an atom, using
         its atomic number. If the entity is charged (i.e. it is an ion),
         electronic structure can also be calculated, but block, group and
-        period are not.
+        period etc., are not.
         """
         population = {"electrons": atomic_nr + charge, "sequence": []}
         self.shells: dict[int, dict[int, SubShell]] = {}
@@ -96,11 +134,16 @@ class Atom:
                 if sub_shell.electrons
             }
 
-        self._sub_shell_sequence: list[tuple[int, int]] = (
+        # List of tuples containing the principal quantum and azimuthal
+        # quantum numbers of each occupied sub-shell in the sequence they
+        # were filled.
+        self._sub_shell_sequence_qns: list[tuple[int, int]] = (
             population["sequence"]
         )
 
-        self._shell_config = {
+        # Dictionary of principal quantum numbers of each occupied shell with
+        # the total number of electrons in that shell.
+        self._shell_electrons = {
             pqn: sum([
                 sub_shell.electrons
                 for _, sub_shell in self.shells[pqn].items()
@@ -108,7 +151,7 @@ class Atom:
             for pqn in self.shells
         }
 
-        self._last_pqn, self._last_aqn = self._sub_shell_sequence[-1]
+        self._last_pqn, self._last_aqn = self._sub_shell_sequence_qns[-1]
         if self.is_ion:
             self.block = None
             self.group = None
@@ -120,11 +163,13 @@ class Atom:
 
     def _calculate_group(self):
         # Find the index in the sequence of the beginning of the last period
-        period_begin_idx = self._sub_shell_sequence.index((self._last_pqn, 0))
+        period_begin_idx = self._sub_shell_sequence_qns.index(
+            (self._last_pqn, 0)
+        )
 
         # Add up number of electrons added in period
         period_electrons = 0
-        for pqn, aqn in self._sub_shell_sequence[period_begin_idx:]:
+        for pqn, aqn in self._sub_shell_sequence_qns[period_begin_idx:]:
             period_electrons += self.shells[pqn][aqn].electrons
 
         # Handle all the edge cases for group assignment
@@ -156,54 +201,39 @@ class Atom:
             raise RuntimeError("Group calculation not implemented: "
                                f"period = {self._last_pqn}")
 
-            # TODO Needs testing
-            # TODO Write tests for all!
-
         return period_electrons
 
     @property
     def shell_structure(self):
+        """
+        A string reporting the total number of electrons in each shell,
+        separated by dots.
+        """
         cfg = [
-            f"{self._shell_config[pqn]}"
-            for pqn in self._shell_config
+            f"{self._shell_electrons[pqn]}"
+            for pqn in self._shell_electrons
         ]
         return ".".join(cfg)
 
     @property
-    def _sub_shell_config(self) -> dict[str, int]:
+    def _sub_shells_sequence(self):
         """
-        A dictionary of all sub-shell names its number of electrons.
+        A list of all occupied sub-shells in the order they were filled
         """
-        return {
-                sub_shell.name: sub_shell.electrons
-                for pqn in self.shells
-                for _, sub_shell in self.shells[pqn].items()
-            }
+        return [
+            self.shells[pqn][aqn]
+            for pqn, aqn in self._sub_shell_sequence_qns
+        ]
 
     @property
     def sub_shell_structure(self) -> str:
         """
-        A string of each sub-shell name with its number of electrons as a
-        superscript. Uses LaTeX formatting.
+        A string containing the sub-shell name with the associated number of
+        electrons (as a superscript, in LaTeX format) for all occupied
+        sub-shells. Sub-shells listed in filling order.
         """
         cfg = [
-            f"{name}{{^{electrons}}}"
-            for name, electrons in self._sub_shell_config.items()
+            str(sub_shell)
+            for sub_shell in self._sub_shells_sequence
         ]
-
         return " ".join(cfg)
-
-
-# if __name__ == "__main__":
-#     # el_h = Atom(1)
-#     # el_he = Atom(2)
-#     # 0
-
-
-#     # el_zr = Atom(40)  # Should be in group 4
-#     # el_in = Atom(49)  # Should be group 13
-#     # og = Atom(118)
-#     eu = Atom(65)
-#     tc = Atom(43)
-#     he = Atom(2)
-#     0
