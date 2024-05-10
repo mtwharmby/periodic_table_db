@@ -16,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 class PeriodicTableDB:
 
-    def __init__(self, engine: Engine, md: MetaData) -> None:
+    def __init__(self, engine: Engine, md: MetaData, extended=False) -> None:
         self.metadata_obj = md
         self.engine = engine
-        self.element = element_table(self.metadata_obj, extended=False)
+        self.element = element_table(self.metadata_obj, extended=extended)
         self.atomic_weight = atomic_weight_table(self.metadata_obj)
         self.atomic_weight_type = atomic_weight_type_table(self.metadata_obj)
 
