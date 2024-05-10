@@ -1,4 +1,4 @@
-from periodic_table_db.data.electronic_structure import SubShell
+from periodic_table_db.extended.data.electronic_structure import SubShell
 
 
 class TestSubShell:
