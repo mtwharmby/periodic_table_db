@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Float, Integer, String, ForeignKey, Table, MetaData
 )
 
-from .. import (
+from . import (
     ATOMIC_NR, ELEM_SYMBOL, ELEM_NAME, ELEM_WEIGHT_ID, AT_WEIGHT,
     AT_WEIGHT_ESD, AT_WEIGHT_MIN, AT_WEIGHT_MAX, AT_WEIGHT_TYPE_ID,
 )

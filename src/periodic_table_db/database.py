@@ -39,6 +39,7 @@ class PeriodicTableDB:
         """
         Create the constants in the atomic weight type table.
         """
+        # TODO Move these to new data module
         at_weight_values = [
             {
                 "name": WEIGHT_TYPE_NONE,
