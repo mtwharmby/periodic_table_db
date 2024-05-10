@@ -17,9 +17,12 @@ def element_table(metadata_obj: MetaData, extended: bool = False) -> Table:
     ]
 
     if extended:
-        pass
-        # group, period, block (others?)
-        # columns.append()
+        extra_cols = [
+            Column("period", Integer, ForeignKey("Period.number")),
+            Column("group", Integer, ForeignKey("Group.number")),
+            Column("block_id", Integer, ForeignKey("Block.id")),
+        ]
+        columns.extend(extra_cols)
 
     return Table("Element", metadata_obj, *columns)
 
