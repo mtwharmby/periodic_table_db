@@ -1,7 +1,7 @@
 import logging
 
 from sqlalchemy import (
-    MetaData, insert, select, Connection, bindparam, null, or_, create_engine,
+    MetaData, insert, select, Connection, bindparam, null, or_, Engine,
 )
 
 from . import (
@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 class PeriodicTableDB:
 
-    def __init__(self, db_url: str, md: MetaData) -> None:
+    def __init__(self, engine: Engine, md: MetaData) -> None:
         self.metadata_obj = md
-        self.engine = create_engine(db_url)
+        self.engine = engine
         self.element = element_table(self.metadata_obj, extended=False)
         self.atomic_weight = atomic_weight_table(self.metadata_obj)
         self.atomic_weight_type = atomic_weight_type_table(self.metadata_obj)
