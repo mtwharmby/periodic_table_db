@@ -181,10 +181,7 @@ def get_weight_type_ids(
 
     with (nullcontext(conn) if conn else db.connect()) as conn:
         weight_type_ids_res = conn.execute(weight_type_ids_stmt)
-        weight_type_ids = [row._mapping for row in weight_type_ids_res]
-        return {
-            row["name"]: row["id"] for row in weight_type_ids
-        }
+        return dict(weight_type_ids_res.t.all())
 
 
 def get_none_weight_id(
