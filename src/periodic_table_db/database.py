@@ -30,6 +30,13 @@ class PeriodicTableDBBase:
             self.metadata_obj, **kwargs
         )
 
+    def connect(self) -> Connection:
+        """
+        Calls the internal SQLalchemy Engine.connect() method.
+        Convenience method.
+        """
+        return self.engine.connect()
+
     def create_db(self):
         """
         Initialises the elements database.
@@ -39,27 +46,27 @@ class PeriodicTableDBBase:
         logger.info("Initialising database.")
         self.metadata_obj.create_all(self.engine)
 
-        with self.engine.connect() as conn:
-            self._add_atomic_weight_types(conn)
+        self._add_atomic_weight_types()
 
-    def _add_atomic_weight_types(self, conn: Connection):
+    def _add_atomic_weight_types(self):
         """
         Create the constants in the atomic weight type table.
         """
-        logger.info(
-            f"Adding weight types to {self.atomic_weight_type.name} table."
-        )
-        conn.execute(
-            insert(self.atomic_weight_type), at_weight_values
-        )
-        conn.commit()
+        with self.connect() as conn:
+            logger.info(
+                f"Adding weight types to {self.atomic_weight_type.name} table."
+            )
+            conn.execute(
+                insert(self.atomic_weight_type), at_weight_values
+            )
+            conn.commit()
 
     def add_elements(self, elements: list[Element]):
         """
         Adds elements and their atomic weights to database, based on a list of
         elements supplied to the function.
         """
-        with self.engine.connect() as conn:
+        with self.connect() as conn:
             element_values = []
             weight_values = []
 
@@ -116,7 +123,7 @@ class PeriodicTableDBBase:
 
 
 def get_weight_type_ids(
-        db: PeriodicTableDBBase, conn: Connection
+        db: PeriodicTableDBBase, conn: Connection = None
         ) -> dict[str, int]:
     """
     Returns a mapping of the name of the method used to determine/state the
@@ -125,14 +132,18 @@ def get_weight_type_ids(
     weight_type_ids_stmt = (
         select(db.atomic_weight_type.c.name, db.atomic_weight_type.c.id)
     )
-    weight_type_ids_res = conn.execute(weight_type_ids_stmt)
-    weight_type_ids = [row._mapping for row in weight_type_ids_res]
-    return {
-        row["name"]: row["id"] for row in weight_type_ids
-    }
+
+    with (conn if conn else db.connect()) as conn:
+        weight_type_ids_res = conn.execute(weight_type_ids_stmt)
+        weight_type_ids = [row._mapping for row in weight_type_ids_res]
+        return {
+            row["name"]: row["id"] for row in weight_type_ids
+        }
 
 
-def get_none_weight_id(db: PeriodicTableDBBase, conn: Connection) -> int:
+def get_none_weight_id(
+        db: PeriodicTableDBBase, conn: Connection = None
+        ) -> int:
     """
     Returns the database id of the atomic weight stated as "None".
     """
@@ -144,5 +155,7 @@ def get_none_weight_id(db: PeriodicTableDBBase, conn: Connection) -> int:
             db.atomic_weight_type.c.name == WEIGHT_TYPE_NONE
         )
     )
-    none_weight_id_res = conn.execute(none_weight_id_stmt)
-    return none_weight_id_res.scalar_one()
+
+    with (conn if conn else db.connect()) as conn:
+        none_weight_id_res = conn.execute(none_weight_id_stmt)
+        return none_weight_id_res.scalar_one()
