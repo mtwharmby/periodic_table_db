@@ -5,7 +5,7 @@ from sqlalchemy import (
 from .shared import (
     ATOMIC_NR, ELEM_SYMBOL, ELEM_NAME, ELEM_WEIGHT_ID, AT_WEIGHT,
     AT_WEIGHT_ESD, AT_WEIGHT_MIN, AT_WEIGHT_MAX, AT_WEIGHT_TYPE_ID,
-    ION_SYMBOL, ION_CHARGE
+    ION_ID, ION_SYMBOL, ION_CHARGE,
 )
 
 
@@ -61,7 +61,7 @@ def ions_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
         f"{prefix}Ion",
         metadata_obj,
-        Column("id", Integer, primary_key=True),
+        Column(ION_ID, Integer, primary_key=True),
         Column(ION_SYMBOL, String, nullable=False),
         Column(ION_CHARGE, Integer, nullable=False),
         Column(ATOMIC_NR, Integer, ForeignKey(f"Element.{ATOMIC_NR}"))

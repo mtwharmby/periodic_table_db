@@ -1,4 +1,5 @@
 from dataclasses import dataclass, asdict
+import re
 
 
 ATOMIC_NR = "atomic_number"
@@ -16,6 +17,7 @@ WEIGHT_TYPE_NONE = "None"
 WEIGHT_TYPE_INTERVAL = "Interval"
 WEIGHT_TYPE_REPORTED = "Reported"
 
+ION_ID = "id"
 ION_SYMBOL = "symbol"
 ION_CHARGE = "charge"
 
@@ -60,3 +62,25 @@ class Ion:
         d = asdict(self)
         del d["element_symbol"]
         return d
+
+
+ion_symbol_re = re.compile(r"(^[A-Z][a-z]?)(\d*)([+-]?)")
+
+
+def make_ion_for_symbol(symbol: str) -> Ion:
+    symbol_parts = ion_symbol_re.search(symbol)
+    assert symbol is not None
+
+    elem_symbol = symbol_parts.group(1)
+    if symbol_parts.group(2):
+        charge = int(symbol_parts.group(2))
+        if symbol_parts.group(3) == "-":
+            charge = -charge
+    else:
+        charge = 0
+
+    return Ion(
+        element_symbol=elem_symbol,
+        charge=charge,
+        symbol=symbol
+    )
