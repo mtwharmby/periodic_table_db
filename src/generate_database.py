@@ -5,7 +5,7 @@ import sys
 
 from sqlalchemy import MetaData, create_engine
 
-from periodic_table_db.database import PeriodicTableDB
+from periodic_table_db.database import PeriodicTableDBBase
 from periodic_table_db.features import get_elements
 
 
@@ -31,7 +31,7 @@ def generate_db(db_path: Path = None, interactive: bool = True):
 
     # Initialise the database
     engine = create_engine(db_url)
-    pt_db = PeriodicTableDB(engine, MetaData())
+    pt_db = PeriodicTableDBBase(engine, MetaData())
     pt_db.create_db()
 
     # Get elements from CIAAW website...

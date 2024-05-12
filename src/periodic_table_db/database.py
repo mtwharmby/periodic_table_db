@@ -14,7 +14,7 @@ from .schema import (
 logger = logging.getLogger(__name__)
 
 
-class PeriodicTableDB:
+class PeriodicTableDBBase:
 
     def __init__(self, engine: Engine, md: MetaData, extended=False) -> None:
         self.metadata_obj = md
@@ -139,7 +139,7 @@ class PeriodicTableDB:
 
 
 def get_weight_type_ids(
-        db: PeriodicTableDB, conn: Connection
+        db: PeriodicTableDBBase, conn: Connection
         ) -> dict[str, int]:
     """
     Returns a mapping of the name of the method used to determine/state the
@@ -155,7 +155,7 @@ def get_weight_type_ids(
     }
 
 
-def get_none_weight_id(db: PeriodicTableDB, conn: Connection) -> int:
+def get_none_weight_id(db: PeriodicTableDBBase, conn: Connection) -> int:
     """
     Returns the database id of the atomic weight stated as "None".
     """

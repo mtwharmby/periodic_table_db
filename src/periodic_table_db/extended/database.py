@@ -2,7 +2,7 @@ import logging
 
 from sqlalchemy import Engine, MetaData, insert
 
-from .. import PeriodicTableDB
+from .. import PeriodicTableDBBase
 from .data.group_data import groups as group_values
 from .schema import (
     period_table, group_table, block_table, label_table, label_to_element_table
@@ -11,7 +11,7 @@ from .schema import (
 logger = logging.getLogger(__name__)
 
 
-class PeriodicTableDBExtra(PeriodicTableDB):
+class PeriodicTableDB(PeriodicTableDBBase):
 
     def __init__(self, engine: Engine, md: MetaData) -> None:
         super().__init__(engine, md, extended=True)
