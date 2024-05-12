@@ -4,7 +4,7 @@ from sqlalchemy import (
     MetaData, insert, select, Connection, bindparam, null, or_, Engine,
 )
 
-from . import (
+from .shared import (
     Element, WEIGHT_TYPE_NONE
 )
 from .data import atomic_weight_types as at_weight_values

@@ -1,4 +1,4 @@
-from . import (
+from .shared import (
     WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
 )
 
