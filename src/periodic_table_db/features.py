@@ -135,8 +135,8 @@ def parse_elements_text(raw_elements: list[RawElement]) -> list[Element]:
 
 def get_elements(url: str = PERIODIC_TABLE_URL):
     """
-    Entry point for table parsing on PERIODIC_TABLE_URL website; returns
-    parsed list of elements.
+    Entry point for parsing PERIODIC_TABLE_URL website and table therein.
+    Returns parsed list of elements.
     """
     logger.info(f"Getting URL: {url}")
     html = requests.get(url)
