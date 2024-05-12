@@ -5,11 +5,11 @@ from sqlalchemy import (
 )
 
 from .shared import (
-    Element, WEIGHT_TYPE_NONE
+    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL
 )
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
-    element_table, atomic_weight_table, atomic_weight_type_table
+    element_table, atomic_weight_table, atomic_weight_type_table, ions_table
 )
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ class PeriodicTableDBBase:
         self.atomic_weight_type = atomic_weight_type_table(
             self.metadata_obj, **kwargs
         )
+        self.ion = ions_table(self.metadata_obj, **kwargs)
 
     def connect(self) -> Connection:
         """
@@ -69,6 +70,7 @@ class PeriodicTableDBBase:
         with self.connect() as conn:
             element_values = []
             weight_values = []
+            elements_as_ions = []
 
             for elem in elements:
                 el = elem.dict()
@@ -78,6 +80,10 @@ class PeriodicTableDBBase:
                 element_values.append(el)
                 if weight not in weight_values:
                     weight_values.append(weight)
+
+                # For each element add an Ion:
+                ion = Ion(elem.symbol, 0, elem.atomic_number)
+                elements_as_ions.append(ion)
 
             # Insert the atomic weights
             # Use subquery to associate weight types with each weight
@@ -120,6 +126,41 @@ class PeriodicTableDBBase:
                         f"{self.element.name} table.")
             conn.execute(elements_insert_stmt, element_values)
             conn.commit()
+
+            self.add_ions(elements_as_ions, conn=conn)
+
+    def add_ions(self, ions: Ion | list[Ion], conn: Connection = None):
+        if isinstance(ions, Ion):
+            ions = [ions, ]
+
+        with (conn if conn else self.connect()) as conn:
+            ion_values = []
+            for elem_ion in ions:
+                if elem_ion.atomic_number is None:
+                    elem_ion.atomic_number = (
+                        get_atomic_nr_for_symbol(self, elem_ion.symbol)
+                    )
+                ion_values.append(elem_ion.dict())
+
+            logger.info(f"Adding {len(ion_values)} ion entries to "
+                        f"{self.ion.name} table.")
+            conn.execute(insert(self.ion), ion_values)
+            conn.commit()
+
+
+def get_atomic_nr_for_symbol(
+        db: PeriodicTableDBBase, symbol: str, conn: Connection = None
+        ) -> int:
+    """
+    Get the atomic number of an element from its symbol.
+    """
+    atomic_nr_stmt = (
+        select(db.element.c[ATOMIC_NR])
+        .where(db.element.c[ELEM_SYMBOL] == symbol)
+    )
+    with (conn if conn else db.connect()) as conn:
+        atomic_nr_res = conn.execute(atomic_nr_stmt)
+        return atomic_nr_res.scalar_one_or_none()
 
 
 def get_weight_type_ids(

@@ -16,6 +16,9 @@ WEIGHT_TYPE_NONE = "None"
 WEIGHT_TYPE_INTERVAL = "Interval"
 WEIGHT_TYPE_REPORTED = "Reported"
 
+ION_SYMBOL = "symbol"
+ION_CHARGE = "charge"
+
 
 @dataclass
 class AtomicWeight:
@@ -36,3 +39,24 @@ class Element:
     weight: AtomicWeight
 
     dict = asdict
+
+
+@dataclass
+class Ion:
+    element_symbol: str
+    charge: int
+    atomic_number: int = None
+    symbol: str = None
+
+    def dict(self):
+        if not self.symbol:
+            if self.charge > 0:
+                self.symbol = f"{self.element_symbol}{self.charge}+"
+            elif self.charge < 0:
+                self.symbol = f"{self.element_symbol}{self.charge}-"
+            else:
+                self.symbol = f"{self.element_symbol}"
+
+        d = asdict(self)
+        del d["element_symbol"]
+        return d
