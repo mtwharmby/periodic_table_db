@@ -6,7 +6,7 @@ import sys
 from sqlalchemy import MetaData, create_engine
 
 from periodic_table_db.database import PeriodicTableDB
-from periodic_table_db.www_table_parser import parse_table
+from periodic_table_db.www_table_parser import get_elements
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def generate_db(db_path: Path = None, interactive: bool = True):
     pt_db.create_db()
 
     # Get elements from CIAAW website...
-    elements = parse_table()
+    elements = get_elements()
     # ... and put them in the database
     pt_db.add_elements(elements)
 
