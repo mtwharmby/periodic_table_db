@@ -5,7 +5,7 @@ from sqlalchemy import (
 )
 
 from .shared import (
-    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL
+    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID
 )
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
@@ -30,6 +30,7 @@ class PeriodicTableDBBase:
             self.metadata_obj, **kwargs
         )
         self.ion = ions_table(self.metadata_obj, **kwargs)
+        self.ion_table_pk = f"{self.ion.name}.{ION_ID}"
 
     def connect(self) -> Connection:
         """
@@ -142,8 +143,11 @@ class PeriodicTableDBBase:
                     )
                 ion_values.append(elem_ion.dict())
 
-            logger.info(f"Adding {len(ion_values)} ion entries to "
-                        f"{self.ion.name} table.")
+            if len(ions) == 1:
+                msg = f"Adding entry for '{ions[0].symbol}' ion to"
+            else:
+                msg = f"Adding {len(ion_values)} ion entries to"
+            logger.info(f"{msg} {self.ion.name} table.")
             conn.execute(insert(self.ion), ion_values)
             conn.commit()
 
