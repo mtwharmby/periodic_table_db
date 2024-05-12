@@ -34,9 +34,9 @@ class PeriodicTableDBBase:
         self.metadata_obj.create_all(self.engine)
 
         with self.engine.connect() as conn:
-            self.add_atomic_weight_types(conn)
+            self._add_atomic_weight_types(conn)
 
-    def add_atomic_weight_types(self, conn: Connection):
+    def _add_atomic_weight_types(self, conn: Connection):
         """
         Create the constants in the atomic weight type table.
         """
