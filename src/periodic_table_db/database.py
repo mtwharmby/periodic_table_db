@@ -1,4 +1,5 @@
 import logging
+from contextlib import nullcontext
 
 from sqlalchemy import (
     MetaData, insert, select, Connection, bindparam, null, or_, Engine,
@@ -134,7 +135,7 @@ class PeriodicTableDBBase:
         if isinstance(ions, Ion):
             ions = [ions, ]
 
-        with (conn if conn else self.connect()) as conn:
+        with (nullcontext(conn) if conn else self.connect()) as conn:
             ion_values = []
             for elem_ion in ions:
                 if elem_ion.atomic_number is None:
@@ -162,7 +163,7 @@ def get_atomic_nr_for_symbol(
         select(db.element.c[ATOMIC_NR])
         .where(db.element.c[ELEM_SYMBOL] == symbol)
     )
-    with (conn if conn else db.connect()) as conn:
+    with (nullcontext(conn) if conn else db.connect()) as conn:
         atomic_nr_res = conn.execute(atomic_nr_stmt)
         return atomic_nr_res.scalar_one_or_none()
 
@@ -178,7 +179,7 @@ def get_weight_type_ids(
         select(db.atomic_weight_type.c.name, db.atomic_weight_type.c.id)
     )
 
-    with (conn if conn else db.connect()) as conn:
+    with (nullcontext(conn) if conn else db.connect()) as conn:
         weight_type_ids_res = conn.execute(weight_type_ids_stmt)
         weight_type_ids = [row._mapping for row in weight_type_ids_res]
         return {
@@ -201,6 +202,6 @@ def get_none_weight_id(
         )
     )
 
-    with (conn if conn else db.connect()) as conn:
+    with (nullcontext(conn) if conn else db.connect()) as conn:
         none_weight_id_res = conn.execute(none_weight_id_stmt)
         return none_weight_id_res.scalar_one()
