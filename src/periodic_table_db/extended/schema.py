@@ -5,17 +5,17 @@ from sqlalchemy import (
 from .. import ATOMIC_NR
 
 
-def period_table(metadata_obj: MetaData) -> Table:
+def period_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        "Period",
+        f"{prefix}Period",
         metadata_obj,
         Column("number", Integer, primary_key=True)
     )
 
 
-def group_table(metadata_obj: MetaData) -> Table:
+def group_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        "Group",
+        f"{prefix}Group",
         metadata_obj,
         Column("number", Integer, primary_key=True),
         Column("label_eu", String, nullable=False),
@@ -24,18 +24,18 @@ def group_table(metadata_obj: MetaData) -> Table:
     )
 
 
-def block_table(metadata_obj: MetaData) -> Table:
+def block_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        "Block",
+        f"{prefix}Block",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column("block", String, nullable=False)
     )
 
 
-def label_table(metadata_obj: MetaData) -> Table:
+def label_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        "Label",
+        f"{prefix}Label",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column("name", String, nullable=False),
@@ -43,9 +43,9 @@ def label_table(metadata_obj: MetaData) -> Table:
     )
 
 
-def label_to_element_table(metadata_obj: MetaData) -> Table:
+def label_to_element_table(metadata_obj: MetaData, prefix="") -> Table:
     return Table(
-        "ElementLabel",
+        f"{prefix}ElementLabel",
         metadata_obj,
         Column("label_id", Integer, ForeignKey("Label.id"), primary_key=True),
         Column(ATOMIC_NR, Integer, ForeignKey(f"Element.{ATOMIC_NR}"),

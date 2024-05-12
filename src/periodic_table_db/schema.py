@@ -8,7 +8,9 @@ from . import (
 )
 
 
-def element_table(metadata_obj: MetaData, extended: bool = False) -> Table:
+def element_table(
+        metadata_obj: MetaData, extended: bool = False, prefix="", **kwargs
+        ) -> Table:
     columns = [
         Column(ATOMIC_NR, Integer, primary_key=True),
         Column(ELEM_SYMBOL, String, nullable=False, unique=True),
@@ -24,12 +26,12 @@ def element_table(metadata_obj: MetaData, extended: bool = False) -> Table:
         ]
         columns.extend(extra_cols)
 
-    return Table("Element", metadata_obj, *columns)
+    return Table(f"{prefix}Element", metadata_obj, *columns)
 
 
-def atomic_weight_table(metadata_obj: MetaData) -> Table:
+def atomic_weight_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        "AtomicWeight",
+        f"{prefix}AtomicWeight",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column(AT_WEIGHT, Float, nullable=True, unique=True),
@@ -41,9 +43,11 @@ def atomic_weight_table(metadata_obj: MetaData) -> Table:
     )
 
 
-def atomic_weight_type_table(metadata_obj: MetaData) -> Table:
+def atomic_weight_type_table(
+        metadata_obj: MetaData, prefix="", **kwargs
+        ) -> Table:
     return Table(
-        "AtomicWeightType",
+        f"{prefix}AtomicWeightType",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column("name", String, nullable=False),
