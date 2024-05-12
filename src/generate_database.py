@@ -6,7 +6,7 @@ import sys
 from sqlalchemy import MetaData, create_engine
 
 from periodic_table_db.database import PeriodicTableDB
-from periodic_table_db.www_table_parser import get_elements
+from periodic_table_db.features import get_elements
 
 
 logger = logging.getLogger(__name__)
