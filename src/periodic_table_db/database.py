@@ -139,9 +139,12 @@ class PeriodicTableDBBase:
             ion_values = []
             for elem_ion in ions:
                 if elem_ion.atomic_number is None:
-                    elem_ion.atomic_number = (
-                        get_atomic_nr_for_symbol(self, elem_ion.symbol)
-                    )
+                    at_nr = get_atomic_nr_for_symbol(self, elem_ion.symbol)
+                    if at_nr is None:
+                        raise RuntimeError(
+                            f"Cannot find atomic number for {elem_ion}"
+                        )
+                    elem_ion.atomic_number = at_nr
                 ion_values.append(elem_ion.dict())
 
             if len(ions) == 1:

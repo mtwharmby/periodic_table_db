@@ -67,20 +67,25 @@ class Ion:
 ion_symbol_re = re.compile(r"(^[A-Z][a-z]?)(\d*)([+-]?)")
 
 
-def make_ion_for_symbol(symbol: str) -> Ion:
+def make_ion_for_symbol(symbol: str, atomic_nr: int = None) -> Ion:
     symbol_parts = ion_symbol_re.search(symbol)
-    assert symbol is not None
+    assert symbol_parts is not None
 
     elem_symbol = symbol_parts.group(1)
     if symbol_parts.group(2):
         charge = int(symbol_parts.group(2))
         if symbol_parts.group(3) == "-":
             charge = -charge
+    elif symbol_parts.group(3) == "+":
+        charge = 1
+    elif symbol_parts.group(3) == "-":
+        charge = -1
     else:
         charge = 0
 
     return Ion(
         element_symbol=elem_symbol,
         charge=charge,
-        symbol=symbol
+        symbol=symbol,
+        atomic_number=atomic_nr
     )
