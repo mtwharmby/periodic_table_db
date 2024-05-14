@@ -6,7 +6,7 @@ from sqlalchemy import (
 )
 
 from .shared import (
-    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID
+    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID, ION_SYMBOL
 )
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
@@ -154,6 +154,17 @@ class PeriodicTableDBBase:
             logger.info(f"{msg} {self.ion.name} table.")
             conn.execute(insert(self.ion), ion_values)
             conn.commit()
+
+    def get_ids_for_ion_symbols(
+            self, ion_symbols: list[str], conn: Connection = None
+            ) -> dict[str, int]:
+        with (nullcontext(conn) if conn else self.connect()) as conn:
+            ion_symbol_ids_stmt = (
+                    select(self.ion.c[ION_SYMBOL], self.ion.c[ION_ID])
+                    .where(self.ion.c[ION_SYMBOL].in_(ion_symbols))
+                )
+            ion_symbol_ids_res = conn.execute(ion_symbol_ids_stmt)
+            return dict(ion_symbol_ids_res.t.all())
 
 
 def get_atomic_nr_for_symbol(
