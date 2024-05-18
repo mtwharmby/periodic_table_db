@@ -30,7 +30,7 @@ class PeriodicTableDBBase:
         self.atomic_weight_type = atomic_weight_type_table(
             self.metadata_obj, **kwargs
         )
-        self.ion = ions_table(self.metadata_obj, **kwargs)
+        self.ion = ions_table(self.metadata_obj, extended=extended, **kwargs)
         self.ion_table_pk = f"{self.ion.name}.{ION_ID}"
 
     def connect(self) -> Connection:

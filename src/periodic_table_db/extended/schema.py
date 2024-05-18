@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Integer, String, ForeignKey, Table, MetaData
 )
 
-from .. import ATOMIC_NR
+from ..shared import ATOMIC_NR, BLOCK, BLOCK_ID
 
 
 def period_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
@@ -28,8 +28,8 @@ def block_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
         f"{prefix}Block",
         metadata_obj,
-        Column("id", Integer, primary_key=True),
-        Column("block", String, nullable=False)
+        Column(BLOCK_ID, Integer, primary_key=True),
+        Column(BLOCK, String, nullable=False)
     )
 
 

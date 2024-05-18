@@ -5,7 +5,8 @@ from sqlalchemy import (
 from .shared import (
     ATOMIC_NR, ELEM_SYMBOL, ELEM_NAME, ELEM_WEIGHT_ID, AT_WEIGHT,
     AT_WEIGHT_ESD, AT_WEIGHT_MIN, AT_WEIGHT_MAX, AT_WEIGHT_TYPE_ID,
-    ION_ID, ION_SYMBOL, ION_CHARGE,
+    ION_ID, ION_SYMBOL, ION_CHARGE, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT,
+    PERIOD, GROUP, ELEM_BLOCK_ID
 )
 
 
@@ -21,9 +22,9 @@ def element_table(
 
     if extended:
         extra_cols = [
-            Column("period", Integer, ForeignKey("Period.number")),
-            Column("group", Integer, ForeignKey("Group.number")),
-            Column("block_id", Integer, ForeignKey("Block.id")),
+            Column(PERIOD, Integer, ForeignKey("Period.number")),
+            Column(GROUP, Integer, ForeignKey("Group.number")),
+            Column(ELEM_BLOCK_ID, Integer, ForeignKey("Block.id")),
         ]
         columns.extend(extra_cols)
 
@@ -57,12 +58,21 @@ def atomic_weight_type_table(
     )
 
 
-def ions_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
-    return Table(
-        f"{prefix}Ion",
-        metadata_obj,
+def ions_table(
+        metadata_obj: MetaData, extended: bool = False, prefix="", **kwargs
+        ) -> Table:
+    columns = [
         Column(ION_ID, Integer, primary_key=True),
         Column(ION_SYMBOL, String, nullable=False),
         Column(ION_CHARGE, Integer, nullable=False),
         Column(ATOMIC_NR, Integer, ForeignKey(f"Element.{ATOMIC_NR}"))
-    )
+    ]
+
+    if extended:
+        extra_cols = [
+            Column(E_SHELL_STRUCT, String, nullable=True),
+            Column(E_SUB_SHELL_STRUCT, String, nullable=True)
+        ]
+        columns.extend(extra_cols)
+
+    return Table(f"{prefix}Ion", metadata_obj, *columns)

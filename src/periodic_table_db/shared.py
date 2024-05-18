@@ -6,6 +6,7 @@ ATOMIC_NR = "atomic_number"
 ELEM_SYMBOL = "symbol"
 ELEM_NAME = "name"
 ELEM_WEIGHT_ID = "atomic_weight_id"
+ELEM_BLOCK_ID = "block_id"
 
 AT_WEIGHT = "weight"
 AT_WEIGHT_ESD = "weight_esd"
@@ -20,6 +21,14 @@ WEIGHT_TYPE_REPORTED = "Reported"
 ION_ID = "id"
 ION_SYMBOL = "symbol"
 ION_CHARGE = "charge"
+
+E_SHELL_STRUCT = "shell_structure"
+E_SUB_SHELL_STRUCT = "sub_shell_structure"
+
+PERIOD = "period"
+GROUP = "group"
+BLOCK = "block"
+BLOCK_ID = "id"
 
 
 @dataclass
