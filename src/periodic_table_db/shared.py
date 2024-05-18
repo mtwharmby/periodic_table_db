@@ -50,7 +50,7 @@ class Ion:
     atomic_number: int = None
     symbol: str = None
 
-    def dict(self):
+    def dict(self) -> dict[str, int | str]:
         if not self.symbol:
             if self.charge > 0:
                 self.symbol = f"{self.element_symbol}{self.charge}+"
