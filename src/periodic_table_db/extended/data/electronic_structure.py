@@ -163,14 +163,16 @@ class Atom:
             self.period = None
         else:
             self.block = AZIMUTHAL_QUANTUM_NUMBER[self._last_aqn]
-            self.group = self._calculate_group()
-            self.period = self._last_pqn
+            self.period, self.group = self._calculate_period_group()
 
-    def _calculate_group(self):
+    def _calculate_period_group(self):
         # Find the index in the sequence of the beginning of the last period
-        period_begin_idx = self._sub_shell_sequence_qns.index(
-            (self._last_pqn, 0)
+        aqn_seq = [qns[1] for qns in self._sub_shell_sequence_qns]
+        # Find last occurrence of 0: https://stackoverflow.com/a/6890255
+        period_begin_idx = next(
+            i for i in reversed(range(len(aqn_seq))) if aqn_seq[i] == 0
         )
+        period = self._sub_shell_sequence_qns[period_begin_idx][0]
 
         # Add up number of electrons added in period
         period_electrons = 0
@@ -179,34 +181,34 @@ class Atom:
 
         # Handle all the edge cases for group assignment
         if self._last_aqn == 0:  # s-block
-            if self._last_pqn == 1:
+            if period == 1:
                 if self.shells[self._last_pqn][self._last_aqn].is_full:
                     # Edge case: Helium
                     return period_electrons + 16
 
-        elif self._last_pqn in [2, 3]:
+        elif period in [2, 3]:
             if self._last_aqn != 0:
                 # Edge case: period 2 & 3 p-block
                 return period_electrons + 10
-        elif self._last_pqn in [6, 7]:
+        elif period in [6, 7]:
             if self._last_aqn in [1, 2]:
                 # Edge case: p- or d-block, with f-block
                 return period_electrons - 14
             elif self._last_aqn == 3:
-                if self._last_pqn == 6:
+                if period == 6:
                     # Edge case: lanthanoids
-                    return -1
-                elif self._last_pqn == 7:
+                    return period, -1
+                elif period == 7:
                     # Edge case: actinoids
-                    return -2
+                    return period, -2
             elif self._last_aqn > 3:
                 raise RuntimeError("Group calculation not implemented: "
                                    f"aqn = {self._last_aqn}")
-        elif self._last_pqn > 7:
+        elif period > 7:
             raise RuntimeError("Group calculation not implemented: "
-                               f"period = {self._last_pqn}")
+                               f"period = {period}")
 
-        return period_electrons
+        return period, period_electrons
 
     @property
     def shell_structure(self):
