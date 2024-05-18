@@ -98,6 +98,7 @@ class Atom:
         electronic structure can also be calculated, but block, group and
         period etc., are not.
         """
+        self.atomic_nr = atomic_nr
         population = {"electrons": atomic_nr + charge, "sequence": []}
         self.shells: dict[int, dict[int, SubShell]] = {}
         self.is_ion = bool(charge)
@@ -216,24 +217,36 @@ class Atom:
         return ".".join(cfg)
 
     @property
-    def _sub_shells_sequence(self):
-        """
-        A list of all occupied sub-shells in the order they were filled
-        """
-        return [
-            self.shells[pqn][aqn]
-            for pqn, aqn in self._sub_shell_sequence_qns
-        ]
-
-    @property
     def sub_shell_structure(self) -> str:
         """
         A string containing the sub-shell name with the associated number of
         electrons (as a superscript, in LaTeX format) for all occupied
         sub-shells. Sub-shells listed in filling order.
         """
+        # List of all occupied sub-shells in the order they were filled
+        sub_shells_seq = [
+            self.shells[pqn][aqn]
+            for pqn, aqn in self._sub_shell_sequence_qns
+        ]
         cfg = [
             str(sub_shell)
-            for sub_shell in self._sub_shells_sequence
+            for sub_shell in sub_shells_seq
         ]
         return " ".join(cfg)
+
+    @property
+    def electrons(self) -> int:
+        """
+        Returns the total number of electrons in this Atom.
+        """
+        electrons_per_shell = [
+            v for v in self._shell_electrons.values()
+        ]
+        return sum(electrons_per_shell)
+
+    @property
+    def charge(self) -> int:
+        """
+        Returns the charge of the Atom (ion).
+        """
+        return self.atomic_nr - self.electrons
