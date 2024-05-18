@@ -1,3 +1,7 @@
+from ...shared import (
+    ATOMIC_NR, PERIOD, GROUP, BLOCK, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT
+)
+
 AZIMUTHAL_QUANTUM_NUMBER = {
     0: "s", 1: "p", 2: "d", 3: "f", 4: "g", 5: "h", 6: "i", 7: "j"
     # j is assumed to be the next value... it will never appear as the empty
@@ -86,7 +90,7 @@ class SubShell:
         return f"<SubShell: {self.name} ({e_config})>"
 
     def __str__(self) -> str:
-        return f"{self.name}{{^{self.electrons}}}"
+        return f"{self.name}^{{{self.electrons}}}"
 
 
 class Atom:
@@ -250,3 +254,15 @@ class Atom:
         Returns the charge of the Atom (ion).
         """
         return self.atomic_nr - self.electrons
+
+    def dict(self) -> dict[str, int | float | str]:
+        atom_dict = {
+            ATOMIC_NR: self.atomic_nr,
+            PERIOD: self.period,
+            GROUP: self.group,
+            BLOCK: self.block,
+            E_SHELL_STRUCT: self.shell_structure,
+            E_SUB_SHELL_STRUCT: self.sub_shell_structure,
+        }
+
+        return atom_dict
