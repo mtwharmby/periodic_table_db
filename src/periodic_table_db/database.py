@@ -64,12 +64,12 @@ class PeriodicTableDBBase:
             )
             conn.commit()
 
-    def add_elements(self, elements: list[Element]):
+    def add_elements(self, elements: list[Element], conn: Connection = None):
         """
         Adds elements and their atomic weights to database, based on a list of
         elements supplied to the function.
         """
-        with self.connect() as conn:
+        with (nullcontext(conn) if conn else self.connect()) as conn:
             element_values = []
             weight_values = []
             elements_as_ions = []
@@ -165,6 +165,51 @@ class PeriodicTableDBBase:
                 )
             ion_symbol_ids_res = conn.execute(ion_symbol_ids_stmt)
             return dict(ion_symbol_ids_res.t.all())
+
+    # TODO Create a similar method to return atomic weight. This can probably
+    # be abstracted to serve both atomic weight & atomic number.
+    def get_atomic_nrs_map(
+            self, symbols: str | list[str] = None, conn: Connection = None
+    ) -> dict[str, int]:
+        """
+        Returns a dict of symbols mapped to their atomic numbers. If no atomic
+        symbols are provided, a dict of all symbols and atomic numbers in the
+        database is returned in ascending order of atomic number.
+        """
+        if isinstance(symbols, str):
+            symbols = [symbols, ]
+
+        with (nullcontext(conn) if conn else self.connect()) as conn:
+            if symbols:
+                get_stmt = (
+                    select(self.element.c[ELEM_SYMBOL],
+                           self.element.c[ATOMIC_NR])
+                    .where(self.element.c[ELEM_SYMBOL].in_(symbols))
+                )
+            else:
+                get_stmt = (
+                    select(self.element.c[ELEM_SYMBOL],
+                           self.element.c[ATOMIC_NR])
+                    .order_by(self.element.c[ATOMIC_NR].asc())
+                )
+
+            get_res = conn.execute(get_stmt)
+            return dict(get_res.t.all())
+
+    def get_atomic_nrs(
+            self, symbols: str | list[str] = None, conn: Connection = None
+    ) -> list[int]:
+        """
+        Return a list of (or a single) atomic number, depending how many atomic
+        symbols are provided as argument. If no atomic symbols are provided,
+        all atomic numbers in the database are returned in ascending order.
+        """
+        atomic_nr_map = self.get_atomic_nrs_map(symbols, conn=conn)
+        if symbols:
+            atomic_nrs = [atomic_nr_map[sym] for sym in symbols]
+            return atomic_nrs[0] if len(atomic_nrs) == 1 else atomic_nrs
+        else:
+            return [v for v in atomic_nr_map.values()]
 
 
 def get_atomic_nr_for_symbol(
