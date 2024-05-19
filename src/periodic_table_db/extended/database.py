@@ -10,7 +10,7 @@ from ..shared import (
     ATOMIC_NR, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP, BLOCK,
     BLOCK_ID
 )
-from .data.group_data import groups as group_values
+from .data import groups as group_values, blocks as block_values
 from .schema import (
     period_table, group_table, block_table, label_table, label_to_element_table
 )
@@ -32,13 +32,14 @@ class PeriodicTableDB(PeriodicTableDBBase):
             self.metadata_obj, **kwargs
         )
 
-    def add_groups(self, conn: Connection = None):
+    def add_groups_blocks(self, conn: Connection = None):
         with (nullcontext(conn) if conn else self.connect()) as conn:
             logger.info(
                 f"Adding group numbers, names and labels to {self.group.name} "
                 "table."
             )
             conn.execute(insert(self.group), group_values)
+            conn.execute(insert(self.block), block_values)
             conn.commit()
 
     def add_electronic_structure_data(

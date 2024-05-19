@@ -1,3 +1,6 @@
+from ...shared import BLOCK
+from .electronic_structure import NON_NUMERIC_GROUP_NAMES
+
 # TODO Add citations!
 
 groups = [
@@ -91,5 +94,24 @@ groups = [
         "label_eu": "VIIIB",
         "label_us": "VIIIA",
         "name": "Noble Gases"
+    },
+    {
+        "number": -1,
+        "label_eu": None,
+        "label_us": None,
+        "name": NON_NUMERIC_GROUP_NAMES[-1]
+    },
+    {
+        "number": -2,
+        "label_eu": None,
+        "label_us": None,
+        "name": NON_NUMERIC_GROUP_NAMES[-2]
     }
+]
+
+blocks = [
+    {BLOCK: "s"},
+    {BLOCK: "p"},
+    {BLOCK: "d"},
+    {BLOCK: "f"},
 ]
