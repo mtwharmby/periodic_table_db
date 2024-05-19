@@ -32,7 +32,7 @@ class PeriodicTableDB(PeriodicTableDBBase):
             self.metadata_obj, **kwargs
         )
 
-    def add_groups_blocks(self, conn: Connection = None):
+    def _add_groups_blocks(self, conn: Connection = None):
         with (nullcontext(conn) if conn else self.connect()) as conn:
             logger.info(
                 f"Adding group numbers, names and labels to {self.group.name} "

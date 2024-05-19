@@ -20,7 +20,7 @@ class PeriodicTableDBBase:
 
     def __init__(
             self, engine: Engine, md: MetaData, extended=False, **kwargs
-            ) -> None:
+    ) -> None:
         self.metadata_obj = md
         self.engine = engine
         self.element = element_table(
@@ -157,7 +157,7 @@ class PeriodicTableDBBase:
 
     def get_ids_for_ion_symbols(
             self, ion_symbols: list[str], conn: Connection = None
-            ) -> dict[str, int]:
+    ) -> dict[str, int]:
         with (nullcontext(conn) if conn else self.connect()) as conn:
             ion_symbol_ids_stmt = (
                     select(self.ion.c[ION_SYMBOL], self.ion.c[ION_ID])
@@ -214,7 +214,7 @@ class PeriodicTableDBBase:
 
 def get_atomic_nr_for_symbol(
         db: PeriodicTableDBBase, symbol: str, conn: Connection = None
-        ) -> int:
+) -> int:
     """
     Get the atomic number of an element from its symbol.
     """
@@ -229,7 +229,7 @@ def get_atomic_nr_for_symbol(
 
 def get_weight_type_ids(
         db: PeriodicTableDBBase, conn: Connection = None
-        ) -> dict[str, int]:
+) -> dict[str, int]:
     """
     Returns a mapping of the name of the method used to determine/state the
     atomic weight of an element to its database id.
@@ -245,7 +245,7 @@ def get_weight_type_ids(
 
 def get_none_weight_id(
         db: PeriodicTableDBBase, conn: Connection = None
-        ) -> int:
+) -> int:
     """
     Returns the database id of the atomic weight stated as "None".
     """

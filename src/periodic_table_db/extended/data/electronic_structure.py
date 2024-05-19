@@ -42,7 +42,7 @@ class SubShell:
 
     def populate(
             self, population: dict[str, int | list[tuple[int, int]]]
-            ) -> dict[str, int | list[tuple[int, int]]]:
+    ) -> dict[str, int | list[tuple[int, int]]]:
         """
         Fill orbitals with electrons.
 

@@ -47,7 +47,7 @@ def generate_db(
     pt_db.add_elements(elements)
 
     if extended:
-        pt_db.add_groups_blocks()
+        pt_db._add_groups_blocks()
         electronic_configs = get_electronic_structure(elements)
         pt_db.add_electronic_structure_data(electronic_configs)
     0

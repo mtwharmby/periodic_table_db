@@ -12,7 +12,7 @@ from .shared import (
 
 def element_table(
         metadata_obj: MetaData, extended: bool = False, prefix="", **kwargs
-        ) -> Table:
+) -> Table:
     columns = [
         Column(ATOMIC_NR, Integer, primary_key=True),
         Column(ELEM_SYMBOL, String, nullable=False, unique=True),
@@ -47,7 +47,7 @@ def atomic_weight_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
 
 def atomic_weight_type_table(
         metadata_obj: MetaData, prefix="", **kwargs
-        ) -> Table:
+) -> Table:
     return Table(
         f"{prefix}AtomicWeightType",
         metadata_obj,
@@ -60,7 +60,7 @@ def atomic_weight_type_table(
 
 def ions_table(
         metadata_obj: MetaData, extended: bool = False, prefix="", **kwargs
-        ) -> Table:
+) -> Table:
     columns = [
         Column(ION_ID, Integer, primary_key=True),
         Column(ION_SYMBOL, String, nullable=False),
