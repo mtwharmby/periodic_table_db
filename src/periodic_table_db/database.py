@@ -93,6 +93,7 @@ class PeriodicTableDBBase:
                 select(self.atomic_weight_type.c.id)
                 .where(self.atomic_weight_type.c.name
                        == bindparam("weight_type"))
+                .scalar_subquery()
             )
             weights_insert_stmt = (
                 insert(self.atomic_weight)
@@ -114,7 +115,7 @@ class PeriodicTableDBBase:
                         self.atomic_weight.c.weight == bindparam("weight"),
                         self.atomic_weight.c.weight == null(),
                     )
-                )
+                ).scalar_subquery()
             )
             # or_ statement needed above, since bindparam returns "col = None"
             # rather than "col IS NULL". This is a variation on this:
