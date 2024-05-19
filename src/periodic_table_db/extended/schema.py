@@ -18,8 +18,8 @@ def group_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
         f"{prefix}Group",
         metadata_obj,
         Column("number", Integer, primary_key=True),
-        Column("label_eu", String, nullable=False),
-        Column("label_us", String, nullable=False),
+        Column("label_eu", String, nullable=True),
+        Column("label_us", String, nullable=True),
         Column("name", String, nullable=True),
     )
 
