@@ -58,18 +58,49 @@ class SubShell:
         """
 
         while (population["electrons"] and not self.is_full):
-            #    and self.electrons < len(self.orbitals) * self.MAX_E_ORBITAL):
-            for i in range(len(self.orbitals)):
-                if (population["electrons"]
-                        and self.orbitals[i] < self.MAX_E_ORBITAL):
-                    self.orbitals[i] += 1
-                    population["electrons"] -= 1
+            population["electrons"] = (
+                self.add_electrons(population["electrons"])
+            )
 
         if bool(sum(self.orbitals)):
             # Only add to the sequence if some electrons added to the sub-shell
             population["sequence"].append((self._pqn, self._aqn))
 
         return population
+
+    def add_electrons(self, e: int = 1):
+        """
+        Add electrons to the orbitals list following the Aufbau principle.
+
+        e should be a positive integer.
+        """
+        for i in range(len(self.orbitals)):
+            if e and self.orbitals[i] < self.MAX_E_ORBITAL:
+                self.orbitals[i] += 1
+                e -= 1
+            elif e == 0:
+                break
+        return e
+
+    def remove_electrons(self, e: int = 1):
+        """
+        Remove electrons from the orbitals list following the Aufbau principle.
+
+        e should be a positive integer.
+        """
+        e = -e
+        while e != 0:
+            if 2 in self.orbitals:
+                last_orb_idx = list(reversed(self.orbitals)).index(2)
+            elif 1 in self.orbitals:
+                last_orb_idx = list(reversed(self.orbitals)).index(1)
+            else:
+                break
+
+            self.orbitals[last_orb_idx] -= 1
+            e += 1
+
+        return e
 
     @property
     def electrons(self):
@@ -146,16 +177,6 @@ class Atom:
             population["sequence"]
         )
 
-        # Dictionary of principal quantum numbers of each occupied shell with
-        # the total number of electrons in that shell.
-        self._shell_electrons = {
-            pqn: sum([
-                sub_shell.electrons
-                for _, sub_shell in self.shells[pqn].items()
-            ])
-            for pqn in self.shells
-        }
-
         self._last_pqn, self._last_aqn = self._sub_shell_sequence_qns[-1]
         if self.is_ion:
             self.block = None
@@ -164,6 +185,12 @@ class Atom:
         else:
             self.block = AZIMUTHAL_QUANTUM_NUMBER[self._last_aqn]
             self.period, self.group = self._calculate_period_group()
+
+        # Edge case: group 11 - filled d-orbital favoured over filled s
+        if self.group == 11:
+            last_s_pqn = self._last_pqn + 1
+            self.shells[last_s_pqn][0].remove_electrons()
+            self.shells[self._last_pqn][self._last_aqn].add_electrons()
 
     def _calculate_period_group(self):
         # Find the index in the sequence of the beginning of the last period
@@ -210,6 +237,20 @@ class Atom:
                                f"period = {period}")
 
         return period, period_electrons
+
+    @property
+    def _shell_electrons(self):
+        """
+        Dictionary of principal quantum numbers of each occupied shell with
+        the total number of electrons in that shell.
+        """
+        return {
+            pqn: sum([
+                sub_shell.electrons
+                for _, sub_shell in self.shells[pqn].items()
+            ])
+            for pqn in self.shells
+        }
 
     @property
     def shell_structure(self):
