@@ -43,11 +43,14 @@ class PeriodicTableDB(PeriodicTableDBBase):
             conn.commit()
 
     def add_electronic_structure_data(
-            self, electronic_configs: Atom | list[Atom],
+            self, atom_orbitals: Atom | list[Atom],
             conn: Connection = None
     ):
-        if isinstance(electronic_configs, Atom):
-            electronic_configs = [electronic_configs, ]
+        if isinstance(atom_orbitals, Atom):
+            atom_orbitals = [atom_orbitals, ]
+        electronic_configs = [
+            at.dict() for at in atom_orbitals
+        ]
 
         with (nullcontext(conn) if conn else self.connect()) as conn:
             # Update entries in the Element table
