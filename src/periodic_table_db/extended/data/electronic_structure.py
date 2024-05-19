@@ -271,16 +271,17 @@ class Atom:
         electrons (as a superscript, in LaTeX format) for all occupied
         sub-shells. Sub-shells listed in filling order.
         """
-        # List of all occupied sub-shells in the order they were filled
-        sub_shells_seq = [
+        # List of all occupied sub-shells in the order of their periods
+        sub_shells_periods = [
             self.shells[pqn][aqn]
-            for pqn, aqn in self._sub_shell_sequence_qns
+            for pqn, sub_shell in self.shells.items()
+            for aqn in sub_shell
         ]
         cfg = [
             str(sub_shell)
-            for sub_shell in sub_shells_seq
+            for sub_shell in sub_shells_periods
         ]
-        return " ".join(cfg)
+        return ".".join(cfg)
 
     @property
     def electrons(self) -> int:

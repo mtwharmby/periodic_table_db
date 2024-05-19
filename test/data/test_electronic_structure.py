@@ -66,3 +66,13 @@ class TestAtom:
     def test_shell_structure(self, at_nr, shell_struct):
         at = Atom(at_nr)
         assert at.shell_structure == shell_struct
+
+    @pytest.mark.parametrize(
+        "at_nr, sub_shell_struct",
+        [(2, "1s^{2}"),
+         (29, "1s^{2}.2s^{2}.2p^{6}.3s^{2}.3p^{6}.3d^{10}.4s^{1}")
+         ]
+    )
+    def test_sub_shell_structure(self, at_nr, sub_shell_struct):
+        at = Atom(at_nr)
+        assert at.sub_shell_structure == sub_shell_struct
