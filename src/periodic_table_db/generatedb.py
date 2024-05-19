@@ -7,12 +7,16 @@ from sqlalchemy import MetaData, create_engine
 
 from periodic_table_db.database import PeriodicTableDBBase
 from periodic_table_db.features import get_elements
+from periodic_table_db.extended.database import PeriodicTableDB
+from periodic_table_db.extended.features import get_electronic_structure
 
 
 logger = logging.getLogger(__name__)
 
 
-def generate_db(db_path: Path = None, interactive: bool = True):
+def generate_db(
+        db_path: Path = None, interactive: bool = True, extended: bool = False
+):
     if db_path:
         db_path = db_path.resolve()
         if db_path.exists():
@@ -31,13 +35,22 @@ def generate_db(db_path: Path = None, interactive: bool = True):
 
     # Initialise the database
     engine = create_engine(db_url)
-    pt_db = PeriodicTableDBBase(engine, MetaData())
+    pt_db = (
+        PeriodicTableDB(engine, MetaData()) if extended
+        else PeriodicTableDBBase(engine, MetaData())
+    )
     pt_db.create_db()
 
     # Get elements from CIAAW website...
     elements = get_elements()
     # ... and put them in the database
     pt_db.add_elements(elements)
+
+    if extended:
+        pt_db.add_groups_blocks()
+        electronic_configs = get_electronic_structure(elements)
+        pt_db.add_electronic_structure_data(electronic_configs)
+    0
 
 
 def main(interactive=True):
@@ -53,7 +66,11 @@ def main(interactive=True):
         )
         parser.add_argument(
             "--debug", action="store_true",
-            help="Enable debug log output"
+            help="Enable debug log output."
+        )
+        parser.add_argument(
+            "--extended", action="store_true",
+            help="Enable extended database features."
         )
 
         args = parser.parse_args()
@@ -69,6 +86,9 @@ def main(interactive=True):
 
         if args.debug:
             logging.getLogger().setLevel(logging.DEBUG)
+
+        if args.extended:
+            kwargs["extended"] = True
 
     generate_db(interactive=interactive, **kwargs)
 
