@@ -99,7 +99,7 @@ class PeriodicTableDBBase:
                 insert(self.atomic_weight)
                 .values(weight_type_id=weight_type_subq)
             )
-            logger.info(f"Adding {len(weight_values)} atomic weight entries "
+            logger.info(f"Adding {len(weight_values)} entries "
                         f"to {self.atomic_weight.name} table.")
             conn.execute(weights_insert_stmt, weight_values)
             conn.commit()
@@ -125,7 +125,7 @@ class PeriodicTableDBBase:
             elements_insert_stmt = (
                 insert(self.element).values(atomic_weight_id=weight_subq)
             )
-            logger.info(f"Adding {len(element_values)} element entries to "
+            logger.info(f"Adding {len(element_values)} entries to "
                         f"{self.element.name} table.")
             conn.execute(elements_insert_stmt, element_values)
             conn.commit()
@@ -143,15 +143,15 @@ class PeriodicTableDBBase:
                     at_nr = get_atomic_nr_for_symbol(self, elem_ion.symbol)
                     if at_nr is None:
                         raise RuntimeError(
-                            f"Cannot find atomic number for {elem_ion}"
+                            f"Cannot find atomic number for {elem_ion}."
                         )
                     elem_ion.atomic_number = at_nr
                 ion_values.append(elem_ion.dict())
 
             if len(ions) == 1:
-                msg = f"Adding entry for '{ions[0].symbol}' ion to"
+                msg = f"Adding entry for '{ions[0].symbol}' to"
             else:
-                msg = f"Adding {len(ion_values)} ion entries to"
+                msg = f"Adding {len(ion_values)} entries to"
             logger.info(f"{msg} {self.ion.name} table.")
             conn.execute(insert(self.ion), ion_values)
             conn.commit()

@@ -39,6 +39,10 @@ class PeriodicTableDB(PeriodicTableDBBase):
                 "table."
             )
             conn.execute(insert(self.group), group_values)
+
+            logger.info(
+                f"Adding block names to {self.block.name} table."
+            )
             conn.execute(insert(self.block), block_values)
             conn.commit()
 
@@ -76,7 +80,7 @@ class PeriodicTableDB(PeriodicTableDBBase):
             )
             logger.info(f"Updating {len(elem_values)} entries in "
                         f"{self.element.name} table with electronic "
-                        "configuration")
+                        "configuration.")
             conn.execute(elem_update_stmt, elem_values)
 
             # Update the entries in the Ion table
