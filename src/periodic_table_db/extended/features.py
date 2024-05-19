@@ -1,8 +1,8 @@
 from .. import Element
-from . import Atom
+from .data import Atom
 
 
-def generate_electronic_structure(elements: list[Element]):
+def get_electronic_structure(elements: list[Element]):
     return [
         Atom(el.atomic_number)
         for el in elements

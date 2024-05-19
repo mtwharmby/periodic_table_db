@@ -41,14 +41,14 @@ class PeriodicTableDB(PeriodicTableDBBase):
             conn.execute(insert(self.group), group_values)
             conn.commit()
 
-    def add_electronic_structure_data(self, conn: Connection = None):
+    def add_electronic_structure_data(
+            self, electronic_configs: Atom | list[Atom],
+            conn: Connection = None
+    ):
+        if isinstance(electronic_configs, Atom):
+            electronic_configs = [electronic_configs, ]
+
         with (nullcontext(conn) if conn else self.connect()) as conn:
-            all_atomic_nrs = self.get_atomic_nrs(conn=conn)
-
-            electronic_configs = [
-                Atom(nr).dict() for nr in all_atomic_nrs
-            ]
-
             # Update entries in the Element table
             elem_values = [
                 {
