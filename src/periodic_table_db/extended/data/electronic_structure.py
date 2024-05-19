@@ -168,7 +168,8 @@ class Atom:
     def _calculate_period_group(self):
         # Find the index in the sequence of the beginning of the last period
         aqn_seq = [qns[1] for qns in self._sub_shell_sequence_qns]
-        # Find last occurrence of 0: https://stackoverflow.com/a/6890255
+        # We need to find the last s orbital that was filled.
+        # Find last occurrence of value: https://stackoverflow.com/a/6890255
         period_begin_idx = next(
             i for i in reversed(range(len(aqn_seq))) if aqn_seq[i] == 0
         )
@@ -184,23 +185,23 @@ class Atom:
             if period == 1:
                 if self.shells[self._last_pqn][self._last_aqn].is_full:
                     # Edge case: Helium
-                    return period_electrons + 16
+                    period_electrons += 16
 
         elif period in [2, 3]:
             if self._last_aqn != 0:
                 # Edge case: period 2 & 3 p-block
-                return period_electrons + 10
+                period_electrons += 10
         elif period in [6, 7]:
             if self._last_aqn in [1, 2]:
                 # Edge case: p- or d-block, with f-block
-                return period_electrons - 14
+                period_electrons -= 14
             elif self._last_aqn == 3:
                 if period == 6:
                     # Edge case: lanthanoids
-                    return period, -1
+                    period_electrons = -1
                 elif period == 7:
                     # Edge case: actinoids
-                    return period, -2
+                    period_electrons = -2
             elif self._last_aqn > 3:
                 raise RuntimeError("Group calculation not implemented: "
                                    f"aqn = {self._last_aqn}")
