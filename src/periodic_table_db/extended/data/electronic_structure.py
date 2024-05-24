@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+import re
 from typing import Any
 
 from ...shared import (
@@ -9,6 +10,9 @@ AZIMUTHAL_QUANTUM_NUMBER = {
     0: "s", 1: "p", 2: "d", 3: "f", 4: "g", 5: "h", 6: "i", 7: "j"
     # j is assumed to be the next value... it will never appear as the empty
     # shells get cleaned up
+}
+AZIMUTHAL_QN_REVERSE_MAP = {
+    v: k for k, v in AZIMUTHAL_QUANTUM_NUMBER.items()
 }
 
 NON_NUMERIC_GROUP_NAMES = {
@@ -27,6 +31,8 @@ def get_last_occurrence_index(seq: Sequence, item: Any) -> int:
 class SubShell:
 
     MAX_E_ORBITAL = 2
+    ORBITAL_REGEX = re.compile(r"(?P<pqn>\d+)(?P<aqn_char>[spdfg]?)"
+                               r"\^\{(?P<electrons>\d+)\}")
 
     def __init__(self, pqn: int, aqn: int) -> None:
         """
@@ -46,6 +52,24 @@ class SubShell:
         self.name = f"{pqn}{AZIMUTHAL_QUANTUM_NUMBER[aqn]}"
         self._pqn = pqn
         self._aqn = aqn
+
+    @classmethod
+    def from_sub_shell_structure(cls, sub_shell_struct: str):
+        """
+        Create a new SubShell instance from a sub_shell_structure string.
+        Principle and Azimuthal Quantum Numbers are derived from the string.
+        SubShell is filled with number of electrons given in the string.
+        """
+        mtch = cls.ORBITAL_REGEX.match(sub_shell_struct)
+        electrons = int(mtch.group("electrons"))
+
+        orb = cls(
+            int(mtch.group("pqn")),
+            AZIMUTHAL_QN_REVERSE_MAP[mtch.group("aqn_char")]
+        )
+        orb.add_electrons(electrons)
+
+        return orb
 
     def populate(
             self, population: dict[str, int | list[tuple[int, int]]]
@@ -244,6 +268,20 @@ class Atom:
                                f"period = {period}")
 
         return period, period_electrons
+
+    def correct_orbital_filling(self, sub_shell_struct: str):
+        """
+        Correct the occupancy of the orbitals of this atom by providing
+        specific sub_shell_structure strings.
+        """
+        sub_shell_strs = sub_shell_struct.split(".")
+        corrected_sub_shells = [
+            SubShell.from_sub_shell_structure(struct)
+            for struct in sub_shell_strs
+        ]
+
+        for sub_shell in corrected_sub_shells:
+            self.shells[sub_shell._pqn][sub_shell._aqn] = sub_shell
 
     @property
     def _shell_electrons(self):
