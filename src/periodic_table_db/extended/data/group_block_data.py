@@ -115,3 +115,19 @@ blocks = [
     {BLOCK: "d"},
     {BLOCK: "f"},
 ]
+
+labels = [
+    {
+        "name": "Main Group",
+        "description": "Groups 1, 2 and 13-18 (excluding hydrogen)."
+    },
+    {
+        "name": "Transition Element",
+        "description": "d-block elements with whose atoms or cations have "
+                       "paritally filled d-subshells."
+    },
+    {
+        "name": "Rare Earth Metal",
+        "description": "Scandium, yttrium and the lanthanoids."
+    }
+]
