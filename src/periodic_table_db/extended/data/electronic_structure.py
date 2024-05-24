@@ -1,3 +1,6 @@
+from collections.abc import Sequence
+from typing import Any
+
 from ...shared import (
     ATOMIC_NR, PERIOD, GROUP, BLOCK, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT
 )
@@ -11,6 +14,10 @@ AZIMUTHAL_QUANTUM_NUMBER = {
 NON_NUMERIC_GROUP_NAMES = {
     -1: "Lanthanoids", -2: "Actinoids"
 }
+
+
+def get_last_occurrence_index(seq: Sequence, item: Any) -> int:
+    return next(i for i in reversed(range(len(seq))) if seq[i] == item)
 
 
 # TODO Needs testing
@@ -74,7 +81,7 @@ class SubShell:
 
         e should be a positive integer.
         """
-        for i in range(len(self.orbitals)):
+        for i in list(range(len(self.orbitals))) * self.MAX_E_ORBITAL:
             if e and self.orbitals[i] < self.MAX_E_ORBITAL:
                 self.orbitals[i] += 1
                 e -= 1
@@ -89,16 +96,24 @@ class SubShell:
         e should be a positive integer.
         """
         e = -e
-        while e != 0:
-            if 2 in self.orbitals:
-                last_orb_idx = list(reversed(self.orbitals)).index(2)
-            elif 1 in self.orbitals:
-                last_orb_idx = list(reversed(self.orbitals)).index(1)
-            else:
-                break
 
-            self.orbitals[last_orb_idx] -= 1
-            e += 1
+        if 2 in self.orbitals:
+            last_orb_idx = get_last_occurrence_index(self.orbitals, 2)
+        elif 1 in self.orbitals:
+            last_orb_idx = get_last_occurrence_index(self.orbitals, 1)
+        else:
+            return e
+
+        # List of indices to pass through self.orbitals 2x at most
+        rev_orbital_indies = (list(reversed(range(len(self.orbitals))))
+                              * self.MAX_E_ORBITAL)
+        # Start looping from the last orbital with the highest occupancy
+        for i in rev_orbital_indies[rev_orbital_indies.index(last_orb_idx):]:
+            if e and self.orbitals[i] > 0:
+                self.orbitals[i] -= 1
+                e += 1
+            elif e == 0:
+                break
 
         return e
 
@@ -186,20 +201,12 @@ class Atom:
             self.block = AZIMUTHAL_QUANTUM_NUMBER[self._last_aqn]
             self.period, self.group = self._calculate_period_group()
 
-        # Edge case: group 11 - filled d-orbital favoured over filled s
-        if self.group == 11:
-            last_s_pqn = self._last_pqn + 1
-            self.shells[last_s_pqn][0].remove_electrons()
-            self.shells[self._last_pqn][self._last_aqn].add_electrons()
-
     def _calculate_period_group(self):
         # Find the index in the sequence of the beginning of the last period
         aqn_seq = [qns[1] for qns in self._sub_shell_sequence_qns]
         # We need to find the last s orbital that was filled.
         # Find last occurrence of value: https://stackoverflow.com/a/6890255
-        period_begin_idx = next(
-            i for i in reversed(range(len(aqn_seq))) if aqn_seq[i] == 0
-        )
+        period_begin_idx = get_last_occurrence_index(aqn_seq, 0)
         period = self._sub_shell_sequence_qns[period_begin_idx][0]
 
         # Add up number of electrons added in period
