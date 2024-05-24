@@ -8,14 +8,16 @@ from sqlalchemy import MetaData, create_engine
 from periodic_table_db.database import PeriodicTableDBBase
 from periodic_table_db.features import get_elements
 from periodic_table_db.extended.database import PeriodicTableDB
-from periodic_table_db.extended.features import get_electronic_structure
+from periodic_table_db.extended.features import (
+    get_electronic_structure, correct_ground_states
+)
 
 
 logger = logging.getLogger(__name__)
 
 
 def generate_db(
-        db_path: Path = None, interactive: bool = True, extended: bool = False
+        db_path: Path = None, interactive: bool = True, extended: bool = True
 ):
     if db_path:
         db_path = db_path.resolve()
@@ -49,7 +51,9 @@ def generate_db(
     if extended:
         pt_db._add_groups_blocks()
         electronic_configs = get_electronic_structure(elements)
+        correct_ground_states(electronic_configs)
         pt_db.add_electronic_structure_data(electronic_configs)
+    0
 
 
 def main(interactive=True):

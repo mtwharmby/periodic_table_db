@@ -356,3 +356,9 @@ class Atom:
         }
 
         return atom_dict
+
+
+# TODO Add remaining ground states
+GROUND_STATES = {
+    29: "3d^{10}.4s^{1}"
+}
