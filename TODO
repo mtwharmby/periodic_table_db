@@ -1,7 +1,8 @@
 1: Add group numbers based on: https://www.webelements.com/periodicity/group_number/
-   - Group names (e.g. alkali metals).
-   - Include the s, p, d, f block labels too: https://www.webelements.com/periodicity/block/
-   - Reference for this: https://iupac.org/wp-content/uploads/2016/07/Red_Book_2005.pdf (IR-3.5)
+   x Group names (e.g. alkali metals).
+   x Include the s, p, d, f block labels too: https://www.webelements.com/periodicity/block/
+   x Reference for this: https://iupac.org/wp-content/uploads/2016/07/Red_Book_2005.pdf (IR-3.5)
+   - Add additional labels (e.g. main group)
 
 2: Add generation of JSON file
 
