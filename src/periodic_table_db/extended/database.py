@@ -11,7 +11,7 @@ from ..shared import (
     BLOCK_ID, LABEL, LABEL_ID
 )
 from .data import (
-    groups as group_values, blocks as block_values, labels as label_values
+    groups as group_values, blocks as block_values, label_values
 )
 from .schema import (
     period_table, group_table, block_table, label_table, label_to_element_table
