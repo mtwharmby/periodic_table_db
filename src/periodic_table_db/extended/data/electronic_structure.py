@@ -15,10 +15,6 @@ AZIMUTHAL_QN_REVERSE_MAP = {
     v: k for k, v in AZIMUTHAL_QUANTUM_NUMBER.items()
 }
 
-NON_NUMERIC_GROUP_NAMES = {
-    -1: "Lanthanoids", -2: "Actinoids"
-}
-
 
 def get_last_occurrence_index(seq: Sequence, item: Any) -> int:
     return next(i for i in reversed(range(len(seq))) if seq[i] == item)
@@ -176,6 +172,7 @@ class Atom:
         population = {"electrons": atomic_nr + charge, "sequence": []}
         self.shells: dict[int, dict[int, SubShell]] = {}
         self.is_ion = bool(charge)
+        self.labels: list[str] = []
 
         pqn = 1
         while population["electrons"]:
@@ -256,10 +253,10 @@ class Atom:
             elif self._last_aqn == 3:
                 if period == 6:
                     # Edge case: lanthanoids
-                    period_electrons = -1
+                    period_electrons = None
                 elif period == 7:
                     # Edge case: actinoids
-                    period_electrons = -2
+                    period_electrons = None
             elif self._last_aqn > 3:
                 raise RuntimeError("Group calculation not implemented: "
                                    f"aqn = {self._last_aqn}")

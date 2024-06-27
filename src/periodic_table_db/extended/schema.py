@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Integer, String, ForeignKey, Table, MetaData
 )
 
-from ..shared import ATOMIC_NR, BLOCK, BLOCK_ID
+from ..shared import ATOMIC_NR, BLOCK, BLOCK_ID, LABEL, LABEL_ID
 
 
 def period_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
@@ -37,8 +37,8 @@ def label_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
         f"{prefix}Label",
         metadata_obj,
-        Column("id", Integer, primary_key=True),
-        Column("name", String, nullable=False),
+        Column(LABEL_ID, Integer, primary_key=True),
+        Column(LABEL, String, nullable=False),
         Column("description", String, nullable=True)
     )
 
@@ -47,7 +47,12 @@ def label_to_element_table(metadata_obj: MetaData, prefix="") -> Table:
     return Table(
         f"{prefix}ElementLabel",
         metadata_obj,
-        Column("label_id", Integer, ForeignKey("Label.id"), primary_key=True),
-        Column(ATOMIC_NR, Integer, ForeignKey(f"Element.{ATOMIC_NR}"),
-               primary_key=True),
+        Column(
+            LABEL_ID, Integer, ForeignKey(f"Label.{LABEL_ID}"),
+            primary_key=True
+        ),
+        Column(
+            ATOMIC_NR, Integer, ForeignKey(f"Element.{ATOMIC_NR}"),
+            primary_key=True
+        ),
     )

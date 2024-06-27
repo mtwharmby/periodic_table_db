@@ -8,9 +8,11 @@ from sqlalchemy import (
 from .. import PeriodicTableDBBase
 from ..shared import (
     ATOMIC_NR, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP, BLOCK,
-    BLOCK_ID
+    BLOCK_ID, LABEL, LABEL_ID
 )
-from .data import groups as group_values, blocks as block_values
+from .data import (
+    groups as group_values, blocks as block_values, labels as label_values
+)
 from .schema import (
     period_table, group_table, block_table, label_table, label_to_element_table
 )
@@ -44,6 +46,13 @@ class PeriodicTableDB(PeriodicTableDBBase):
                 f"Adding block names to {self.block.name} table."
             )
             conn.execute(insert(self.block), block_values)
+
+            logger.info(
+                f"Adding label names and descriptions to {self.label.name} "
+                "table."
+            )
+            conn.execute(insert(self.label), label_values)
+
             conn.commit()
 
     def add_electronic_structure_data(
@@ -100,6 +109,28 @@ class PeriodicTableDB(PeriodicTableDBBase):
                         f"{self.ion.name} table with electronic configuration."
                         )
             conn.execute(ions_update_stmt, ion_values)
+
+            labels: list[dict[str, str | int]] = []
+            for at in atom_orbitals:
+                for lab in at.labels:
+                    labels.append({
+                        ATOMIC_NR: at.atomic_nr,
+                        LABEL: lab
+                    })
+
+            if labels:
+                label_subq = (
+                    select(self.label.c[LABEL_ID])
+                    .where(self.label.c[LABEL] == bindparam(LABEL))
+                    .scalar_subquery()
+                )
+                label_maker_stmt = (
+                    insert(self.label_element)
+                    .values(label_id=label_subq)
+                )
+                logger.info(f"Adding {len(labels)} labels to the "
+                            f"{self.label_element.name} table.")
+                conn.execute(label_maker_stmt, labels)
 
             # Element and Ion table statements worked, so commit the changes
             conn.commit()

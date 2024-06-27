@@ -1,5 +1,5 @@
 from .. import Element
-from .data import Atom
+from .data import Atom, label_rules
 from .data.electronic_structure import GROUND_STATES
 
 
@@ -21,3 +21,15 @@ def correct_ground_states(atoms: list[Atom]):
     for atom in atoms:
         if atom.atomic_nr in GROUND_STATES:
             atom.correct_orbital_filling(GROUND_STATES[atom.atomic_nr])
+
+
+def add_labels(atoms: list[Atom]):
+    """
+    Adds labels to atoms based on the rules in label_rules.
+    Labels are derived from properties of the electronic configurations
+    (e.g. group) or atomic number.
+    """
+    for atom in atoms:
+        for label in label_rules:
+            if label_rules[label](atom):
+                atom.labels.append(label)

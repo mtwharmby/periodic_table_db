@@ -29,6 +29,8 @@ PERIOD = "period"
 GROUP = "group"
 BLOCK = "block"
 BLOCK_ID = "id"
+LABEL = "name"
+LABEL_ID = "label_id"
 
 
 @dataclass
