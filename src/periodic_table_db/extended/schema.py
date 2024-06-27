@@ -20,7 +20,6 @@ def group_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
         Column("number", Integer, primary_key=True),
         Column("label_eu", String, nullable=True),
         Column("label_us", String, nullable=True),
-        Column("name", String, nullable=True),
     )
 
 
