@@ -58,8 +58,8 @@ class Element:
 class Ion:
     element_symbol: str
     charge: int
-    atomic_number: int = None
-    symbol: str = None
+    atomic_number: int | None = None
+    symbol: str | None = None
 
     def dict(self) -> dict[str, int | str]:
         if not self.symbol:
