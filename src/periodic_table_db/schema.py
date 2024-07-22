@@ -9,6 +9,13 @@ from .shared import (
     PERIOD, GROUP, ELEM_BLOCK_ID
 )
 
+TABLE_MAP = {
+    "Element": "Element",
+    "AtomicWeight": "AtomicWeight",
+    "AtomicWeightType": "AtomicWeightType",
+    "Ion": "Ion"
+}
+
 
 def element_table(
         metadata_obj: MetaData, extended: bool = False, prefix="", **kwargs
@@ -28,12 +35,12 @@ def element_table(
         ]
         columns.extend(extra_cols)
 
-    return Table(f"{prefix}Element", metadata_obj, *columns)
+    return Table(f"{prefix}{TABLE_MAP["Element"]}", metadata_obj, *columns)
 
 
 def atomic_weight_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        f"{prefix}AtomicWeight",
+        f"{prefix}{TABLE_MAP["AtomicWeight"]}",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column(AT_WEIGHT, Float, nullable=True, unique=True),
@@ -49,7 +56,7 @@ def atomic_weight_type_table(
         metadata_obj: MetaData, prefix="", **kwargs
 ) -> Table:
     return Table(
-        f"{prefix}AtomicWeightType",
+        f"{prefix}{TABLE_MAP["AtomicWeightType"]}",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column("name", String, nullable=False),
@@ -75,4 +82,4 @@ def ions_table(
         ]
         columns.extend(extra_cols)
 
-    return Table(f"{prefix}Ion", metadata_obj, *columns)
+    return Table(f"{prefix}{TABLE_MAP["Ion"]}", metadata_obj, *columns)

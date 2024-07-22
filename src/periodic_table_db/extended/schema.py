@@ -4,10 +4,18 @@ from sqlalchemy import (
 
 from ..shared import ATOMIC_NR, BLOCK, BLOCK_ID, LABEL, LABEL_ID
 
+TABLE_MAP = {
+    "Period": "Period",
+    "Group": "Group",
+    "Block": "Block",
+    "Label": "Label",
+    "ElementLabel": "ElementLabel"
+}
+
 
 def period_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        f"{prefix}Period",
+        f"{prefix}{TABLE_MAP["Period"]}",
         metadata_obj,
         Column("number", Integer, primary_key=True)
     )
@@ -15,7 +23,7 @@ def period_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
 
 def group_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        f"{prefix}Group",
+        f"{prefix}{TABLE_MAP["Group"]}",
         metadata_obj,
         Column("number", Integer, primary_key=True),
         Column("label_eu", String, nullable=True),
@@ -25,7 +33,7 @@ def group_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
 
 def block_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        f"{prefix}Block",
+        f"{prefix}{TABLE_MAP["Block"]}",
         metadata_obj,
         Column(BLOCK_ID, Integer, primary_key=True),
         Column(BLOCK, String, nullable=False)
@@ -34,7 +42,7 @@ def block_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
 
 def label_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        f"{prefix}Label",
+        f"{prefix}{TABLE_MAP["Label"]}",
         metadata_obj,
         Column(LABEL_ID, Integer, primary_key=True),
         Column(LABEL, String, nullable=False),
@@ -44,7 +52,7 @@ def label_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
 
 def label_to_element_table(metadata_obj: MetaData, prefix="") -> Table:
     return Table(
-        f"{prefix}ElementLabel",
+        f"{prefix}{TABLE_MAP["ElementLabel"]}",
         metadata_obj,
         Column(
             LABEL_ID, Integer, ForeignKey(f"Label.{LABEL_ID}"),
