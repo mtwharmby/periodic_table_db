@@ -1,4 +1,5 @@
-from .database import PeriodicTableDBBase, DBConnector
+from .dbconnector import DBConnector
+from .database import PeriodicTableDBBase
 
 from .shared import (
     Element, AtomicWeight,

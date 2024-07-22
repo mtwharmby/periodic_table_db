@@ -5,6 +5,7 @@ from sqlalchemy import (
     MetaData, insert, select, Connection, bindparam, null, or_, Engine,
 )
 
+from .dbconnector import DBConnector
 from .shared import (
     Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID, ION_SYMBOL
 )
@@ -14,20 +15,6 @@ from .schema import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-class DBConnector:
-
-    def __init__(self, engine: Engine, md: MetaData):
-        self.metadata_obj = md
-        self.engine = engine
-
-    def connect(self) -> Connection:
-        """
-        Calls the internal SQLalchemy Engine.connect() method.
-        Convenience method.
-        """
-        return self.engine.connect()
 
 
 class PeriodicTableDBBase(DBConnector):
