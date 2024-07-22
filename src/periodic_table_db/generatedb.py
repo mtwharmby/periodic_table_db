@@ -5,10 +5,11 @@ import sys
 
 from sqlalchemy import MetaData, Engine, create_engine
 
-from .db_builder import PeriodicTableDBBuilderBase
-from .features import get_elements
-from .extended.db_builder import PeriodicTableDBBuilder
-from .extended.features import (
+# Absolute imports here so that debugging can be run
+from periodic_table_db.db_builder import PeriodicTableDBBuilderBase
+from periodic_table_db.features import get_elements
+from periodic_table_db.extended.db_builder import PeriodicTableDBBuilder
+from periodic_table_db.extended.features import (
     get_electronic_structure, correct_ground_states, add_labels
 )
 
