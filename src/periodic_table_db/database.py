@@ -16,13 +16,28 @@ from .schema import (
 logger = logging.getLogger(__name__)
 
 
-class PeriodicTableDBBase:
+class DBConnector:
 
-    def __init__(
-            self, engine: Engine, md: MetaData, extended=False, **kwargs
-    ) -> None:
+    def __init__(self, engine: Engine, md: MetaData):
         self.metadata_obj = md
         self.engine = engine
+
+    def connect(self) -> Connection:
+        """
+        Calls the internal SQLalchemy Engine.connect() method.
+        Convenience method.
+        """
+        return self.engine.connect()
+
+
+class PeriodicTableDBBase(DBConnector):
+
+    def __init__(
+            self, engine: Engine, md: MetaData, extended: bool = False,
+            **kwargs
+    ) -> None:
+        super().__init__(engine, md)
+
         self.element = element_table(
             self.metadata_obj, extended=extended, **kwargs
         )
@@ -32,13 +47,6 @@ class PeriodicTableDBBase:
         )
         self.ion = ions_table(self.metadata_obj, extended=extended, **kwargs)
         self.ion_table_pk = f"{self.ion.name}.{ION_ID}"
-
-    def connect(self) -> Connection:
-        """
-        Calls the internal SQLalchemy Engine.connect() method.
-        Convenience method.
-        """
-        return self.engine.connect()
 
     def create_db(self):
         """
