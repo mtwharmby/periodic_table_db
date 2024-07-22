@@ -5,10 +5,10 @@ import sys
 
 from sqlalchemy import MetaData, Engine, create_engine
 
-from periodic_table_db.database import PeriodicTableDBBase
-from periodic_table_db.features import get_elements
-from periodic_table_db.extended.database import PeriodicTableDB
-from periodic_table_db.extended.features import (
+from .db_builder import PeriodicTableDBBuilderBase
+from .features import get_elements
+from .extended.db_builder import PeriodicTableDBBuilder
+from .extended.features import (
     get_electronic_structure, correct_ground_states, add_labels
 )
 
@@ -38,11 +38,11 @@ def get_db_url(db_path: Path | None, interactive: bool):
 
 def construct_db(
         engine: Engine, md: MetaData, extended: bool
-) -> PeriodicTableDB:
+) -> PeriodicTableDBBuilder:
     # Initialise the database
     pt_db = (
-        PeriodicTableDB(engine, md) if extended
-        else PeriodicTableDBBase(engine, MetaData())
+        PeriodicTableDBBuilder(engine, md) if extended
+        else PeriodicTableDBBuilderBase(engine, MetaData())
     )
     pt_db.create_db()
 

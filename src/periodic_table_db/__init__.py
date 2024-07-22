@@ -1,5 +1,5 @@
 from .dbconnector import DBConnector
-from .database import PeriodicTableDBBase
+from .db_builder import PeriodicTableDBBuilderBase
 from .dbapi import PeriodicTableDBAPI
 
 from .shared import (
@@ -16,7 +16,7 @@ __all__ = [
     AT_WEIGHT_ESD, AT_WEIGHT_MIN, AT_WEIGHT_MAX, AT_WEIGHT_TYPE_ID,
     WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED,
     ION_ID, ION_SYMBOL, make_ion_for_symbol,
-    PeriodicTableDBBase, DBConnector, PeriodicTableDBAPI
+    PeriodicTableDBBuilderBase, DBConnector, PeriodicTableDBAPI
 ]
 
 VERSION = "0.2.2"

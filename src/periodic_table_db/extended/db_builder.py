@@ -5,7 +5,7 @@ from sqlalchemy import (
     Engine, MetaData, Connection, insert, select, bindparam, update,
 )
 
-from .. import PeriodicTableDBBase
+from .. import PeriodicTableDBBuilderBase
 from ..shared import (
     ATOMIC_NR, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP, BLOCK,
     BLOCK_ID, LABEL, LABEL_ID
@@ -21,7 +21,7 @@ from .data import Atom
 logger = logging.getLogger(__name__)
 
 
-class PeriodicTableDB(PeriodicTableDBBase):
+class PeriodicTableDBBuilder(PeriodicTableDBBuilderBase):
 
     def __init__(self, engine: Engine, md: MetaData, **kwargs) -> None:
         super().__init__(engine, md, extended=True, kwargs=kwargs)
