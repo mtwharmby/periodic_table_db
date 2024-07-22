@@ -6,8 +6,9 @@ from sqlalchemy import (
 )
 
 from .dbconnector import DBConnector
+from .dbapi import PeriodicTableDBAPI
 from .shared import (
-    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID, ION_SYMBOL
+    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID
 )
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
@@ -43,6 +44,8 @@ class PeriodicTableDBBase(DBConnector):
         """
         logger.info("Initialising database.")
         self.metadata_obj.create_all(self.engine)
+
+        self.dbapi = PeriodicTableDBAPI(self.engine, self.metadata_obj)
 
         self._add_atomic_weight_types()
 
@@ -125,42 +128,7 @@ class PeriodicTableDBBase(DBConnector):
             conn.execute(elements_insert_stmt, element_values)
             conn.commit()
 
-            self.add_ions(elements_as_ions, conn=conn)
-
-    def add_ions(self, ions: Ion | list[Ion], conn: Connection = None):
-        if isinstance(ions, Ion):
-            ions = [ions, ]
-
-        with (nullcontext(conn) if conn else self.connect()) as conn:
-            ion_values = []
-            for elem_ion in ions:
-                if elem_ion.atomic_number is None:
-                    at_nr = get_atomic_nr_for_symbol(self, elem_ion.symbol)
-                    if at_nr is None:
-                        raise RuntimeError(
-                            f"Cannot find atomic number for {elem_ion}."
-                        )
-                    elem_ion.atomic_number = at_nr
-                ion_values.append(elem_ion.dict())
-
-            if len(ions) == 1:
-                msg = f"Adding entry for '{ions[0].symbol}' to"
-            else:
-                msg = f"Adding {len(ion_values)} entries to"
-            logger.info(f"{msg} {self.ion.name} table.")
-            conn.execute(insert(self.ion), ion_values)
-            conn.commit()
-
-    def get_ids_for_ion_symbols(
-            self, ion_symbols: list[str], conn: Connection = None
-    ) -> dict[str, int]:
-        with (nullcontext(conn) if conn else self.connect()) as conn:
-            ion_symbol_ids_stmt = (
-                    select(self.ion.c[ION_SYMBOL], self.ion.c[ION_ID])
-                    .where(self.ion.c[ION_SYMBOL].in_(ion_symbols))
-                )
-            ion_symbol_ids_res = conn.execute(ion_symbol_ids_stmt)
-            return dict(ion_symbol_ids_res.t.all())
+            self.dbapi.add_ions(elements_as_ions, conn=conn)
 
     # TODO Create a similar method to return atomic weight. This can probably
     # be abstracted to serve both atomic weight & atomic number.
@@ -210,7 +178,7 @@ class PeriodicTableDBBase(DBConnector):
 
 def get_atomic_nr_for_symbol(
         db: PeriodicTableDBBase, symbol: str, conn: Connection = None
-) -> int:
+) -> int | None:
     """
     Get the atomic number of an element from its symbol.
     """
