@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 import sys
 
-from sqlalchemy import MetaData, create_engine
+from sqlalchemy import MetaData, Engine, create_engine
 
 from periodic_table_db.database import PeriodicTableDBBase
 from periodic_table_db.features import get_elements
@@ -16,9 +16,7 @@ from periodic_table_db.extended.features import (
 logger = logging.getLogger(__name__)
 
 
-def generate_db(
-        db_path: Path = None, interactive: bool = True, extended: bool = True
-):
+def get_db_url(db_path: Path | None, interactive: bool):
     if db_path:
         db_path = db_path.resolve()
         if db_path.exists():
@@ -31,14 +29,19 @@ def generate_db(
                     sys.exit(0)
             logger.warning(f"Deleting existing file at {db_path}")
 
-        db_url = f"sqlite:///{db_path}"
+            db_url = f"sqlite:///{db_path}"
     else:
         db_url = "sqlite:///:memory:"
 
+    return db_url
+
+
+def construct_db(
+        engine: Engine, md: MetaData, extended: bool
+) -> PeriodicTableDB:
     # Initialise the database
-    engine = create_engine(db_url)
     pt_db = (
-        PeriodicTableDB(engine, MetaData()) if extended
+        PeriodicTableDB(engine, md) if extended
         else PeriodicTableDBBase(engine, MetaData())
     )
     pt_db.create_db()
@@ -54,6 +57,17 @@ def generate_db(
         correct_ground_states(electronic_configs)
         add_labels(electronic_configs)
         pt_db.add_electronic_structure_data(electronic_configs)
+
+    return pt_db
+
+
+def generate_db(
+        db_path: Path = None, interactive: bool = True, extended: bool = True
+):
+    db_url = get_db_url(db_path, interactive)
+    engine = create_engine(db_url)
+    metadata_obj = MetaData()
+    construct_db(engine, metadata_obj, extended)
     0
 
 
