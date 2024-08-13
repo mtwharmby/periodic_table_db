@@ -3,10 +3,12 @@ import logging
 
 from sqlalchemy import Engine, MetaData, Connection, insert, select
 
-from .dbconnector import DBConnector
-from .schema import TABLE_MAP
-from .extended.schema import TABLE_MAP as EXT_TABLE_MAP
-from .shared import Ion, ATOMIC_NR, ELEM_SYMBOL, ION_ID, ION_SYMBOL
+from ..dbconnector import DBConnector
+
+from ..shared import (
+    ATOMIC_NR, ELEM_SYMBOL, ION_ID, ION_SYMBOL, TABLE_NAMES,
+    TABLE_NAMES_EXTENDED, Ion
+)
 
 
 logger = logging.getLogger(__name__)
@@ -19,9 +21,9 @@ class PeriodicTableDBAPI(DBConnector):
     ):
         super().__init__(engine, md)
 
-        tab_names = list(TABLE_MAP.values())
+        tab_names = list(TABLE_NAMES)
         if extended:
-            tab_names.extend(EXT_TABLE_MAP.values())
+            tab_names.extend(TABLE_NAMES_EXTENDED)
 
         self.tables = self.get_tables_from_existing(tab_names, **kwargs)
 
