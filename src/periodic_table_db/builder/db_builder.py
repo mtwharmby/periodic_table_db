@@ -5,9 +5,9 @@ from sqlalchemy import (
     MetaData, insert, select, Connection, bindparam, null, or_, Engine,
 )
 
-from .dbconnector import DBConnector
-from .dbapi import PeriodicTableDBAPI
-from .shared import (
+from ..dbconnector import DBConnector
+from ..dbapi import PeriodicTableDBAPI
+from ..shared import (
     Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID
 )
 from .data import atomic_weight_types as at_weight_values

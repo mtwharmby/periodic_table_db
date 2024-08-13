@@ -2,7 +2,7 @@ from collections.abc import Sequence
 import re
 from typing import Any
 
-from ...shared import (
+from ....shared import (
     ATOMIC_NR, PERIOD, GROUP, BLOCK, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT
 )
 
