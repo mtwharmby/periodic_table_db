@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Integer, String, ForeignKey, Table, MetaData
 )
 
-from ...shared import ATOMIC_NR, BLOCK, BLOCK_ID, LABEL, LABEL_ID
+from ..shared import ATOMIC_NR, BLOCK, BLOCK_ID, LABEL, LABEL_ID
 
 TABLE_MAP = {
     "Period": "Period",

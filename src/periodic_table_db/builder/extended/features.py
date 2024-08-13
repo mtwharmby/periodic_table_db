@@ -1,4 +1,4 @@
-from .. import Element
+from ..shared import Element
 from .data import Atom, label_rules
 from .data.electronic_structure import GROUND_STATES
 
