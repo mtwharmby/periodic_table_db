@@ -45,7 +45,7 @@ def construct_db(
     # Initialise the database
     pt_db = (
         ExtendedPeriodicTableDBBuilder(engine, md) if extended
-        else PeriodicTableDBBuilder(engine, MetaData())
+        else PeriodicTableDBBuilder(engine, md)
     )
     pt_db.create_db()
 
