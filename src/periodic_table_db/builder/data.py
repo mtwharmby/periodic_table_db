@@ -2,6 +2,10 @@ from .shared import (
     WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
 )
 
+# URL to download periodic table from
+PERIODIC_TABLE_URL = "https://ciaaw.org/atomic-weights.htm"
+
+# Different types of atomic weights - verbatim entry to DB table
 atomic_weight_types = [
     {
         "name": WEIGHT_TYPE_NONE,
