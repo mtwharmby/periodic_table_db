@@ -8,8 +8,9 @@ from sqlalchemy import (
 from ..dbconnector import DBConnector
 from ..dbapi import PeriodicTableDBAPI
 from .shared import (
-    Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID
+    Element, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID,
 )
+from ..shared import ion_factory
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
     element_table, atomic_weight_table, atomic_weight_type_table, ions_table
@@ -82,7 +83,10 @@ class PeriodicTableDBBuilder(DBConnector):
                     weight_values.append(weight)
 
                 # For each element add an Ion:
-                ion = Ion(elem.symbol, 0, elem.atomic_number)
+                ion = ion_factory(
+                    element_symbol=elem.symbol,
+                    charge=0,
+                    atomic_number=elem.atomic_number,)
                 elements_as_ions.append(ion)
 
             # Insert the atomic weights
