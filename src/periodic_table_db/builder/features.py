@@ -4,7 +4,7 @@ import math
 import re
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag, ResultSet
 
 from .shared import (
     WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED,
@@ -33,9 +33,9 @@ def get_elements_from_html(resp: requests.Response) -> list[RawElement]:
 
     logger.info("Processing element rows.")
     raw_elements = []
-    element_rows = soup.find("table").tbody.find_all("tr")
+    element_rows: ResultSet[Tag] = soup.find("table").tbody.find_all("tr")
     for elem in element_rows:
-        vals = elem.find_all("td")
+        vals: ResultSet[Tag] = elem.find_all("td")
         if len(vals) == 0:
             continue
         tabulated_weights = list(
