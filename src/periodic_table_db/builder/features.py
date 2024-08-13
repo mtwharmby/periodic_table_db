@@ -6,8 +6,10 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
-from . import (Element, AtomicWeight, WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL,
-               WEIGHT_TYPE_REPORTED)
+from .shared import (
+    WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED,
+    Element, AtomicWeight
+)
 
 
 PERIODIC_TABLE_URL = "https://ciaaw.org/atomic-weights.htm"

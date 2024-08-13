@@ -7,7 +7,7 @@ from sqlalchemy import (
 
 from ..dbconnector import DBConnector
 from ..dbapi import PeriodicTableDBAPI
-from ..shared import (
+from .shared import (
     Element, Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID
 )
 from .data import atomic_weight_types as at_weight_values

@@ -2,11 +2,9 @@ from sqlalchemy import (
     Column, Float, Integer, String, ForeignKey, Table, MetaData
 )
 
-from ..shared import (
-    ATOMIC_NR, ELEM_SYMBOL, ELEM_NAME, ELEM_WEIGHT_ID, AT_WEIGHT,
-    AT_WEIGHT_ESD, AT_WEIGHT_MIN, AT_WEIGHT_MAX, AT_WEIGHT_TYPE_ID,
-    ION_ID, ION_SYMBOL, ION_CHARGE, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT,
-    PERIOD, GROUP, ELEM_BLOCK_ID
+from .shared import (
+    ATOMIC_NR, ELEM_SYMBOL, AT_WEIGHT, ION_ID, ION_SYMBOL, ION_CHARGE,
+    E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP
 )
 
 TABLE_MAP = {
@@ -23,15 +21,15 @@ def element_table(
     columns = [
         Column(ATOMIC_NR, Integer, primary_key=True),
         Column(ELEM_SYMBOL, String, nullable=False, unique=True),
-        Column(ELEM_NAME, String, nullable=False, unique=True),
-        Column(ELEM_WEIGHT_ID, Integer, ForeignKey("AtomicWeight.id"))
+        Column("name", String, nullable=False, unique=True),
+        Column("atomic_weight_id", Integer, ForeignKey("AtomicWeight.id"))
     ]
 
     if extended:
         extra_cols = [
             Column(PERIOD, Integer, ForeignKey("Period.number")),
             Column(GROUP, Integer, ForeignKey("Group.number")),
-            Column(ELEM_BLOCK_ID, Integer, ForeignKey("Block.id")),
+            Column("block_id", Integer, ForeignKey("Block.id")),
         ]
         columns.extend(extra_cols)
 
@@ -45,10 +43,10 @@ def atomic_weight_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
         Column("id", Integer, primary_key=True),
         Column(AT_WEIGHT, Float, nullable=True, unique=True),
         # Null OK - no defined weight
-        Column(AT_WEIGHT_ESD, Float),
-        Column(AT_WEIGHT_MIN, Float),
-        Column(AT_WEIGHT_MAX, Float),
-        Column(AT_WEIGHT_TYPE_ID, Integer, ForeignKey("AtomicWeightType.id"))
+        Column(f"{AT_WEIGHT}_esd", Float),
+        Column(f"{AT_WEIGHT}_min", Float),
+        Column(f"{AT_WEIGHT}_max", Float),
+        Column("weight_type_id", Integer, ForeignKey("AtomicWeightType.id"))
     )
 
 
