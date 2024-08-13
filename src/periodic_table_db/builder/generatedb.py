@@ -6,10 +6,10 @@ import sys
 from sqlalchemy import MetaData, Engine, create_engine
 
 # Absolute imports here so that debugging can be run
-from periodic_table_db.builder.db_builder import PeriodicTableDBBuilderBase
+from periodic_table_db.builder import PeriodicTableDBBuilder
 from periodic_table_db.builder.features import get_elements
-from periodic_table_db.builder.extended.db_builder import (
-    PeriodicTableDBBuilder
+from periodic_table_db.builder.extended import (
+    ExtendedPeriodicTableDBBuilder
 )
 from periodic_table_db.builder.extended.features import (
     get_electronic_structure, correct_ground_states, add_labels
@@ -44,8 +44,8 @@ def construct_db(
 ) -> PeriodicTableDBBuilder:
     # Initialise the database
     pt_db = (
-        PeriodicTableDBBuilder(engine, md) if extended
-        else PeriodicTableDBBuilderBase(engine, MetaData())
+        ExtendedPeriodicTableDBBuilder(engine, md) if extended
+        else PeriodicTableDBBuilder(engine, MetaData())
     )
     pt_db.create_db()
 

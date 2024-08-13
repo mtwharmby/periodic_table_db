@@ -1,5 +1,5 @@
-from .db_builder import PeriodicTableDBBuilderBase
+from .db_builder import PeriodicTableDBBuilder
 
 __all__ = [
-    PeriodicTableDBBuilderBase
+    PeriodicTableDBBuilder
 ]

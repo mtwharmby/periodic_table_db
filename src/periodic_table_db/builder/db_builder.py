@@ -18,7 +18,7 @@ from .schema import (
 logger = logging.getLogger(__name__)
 
 
-class PeriodicTableDBBuilderBase(DBConnector):
+class PeriodicTableDBBuilder(DBConnector):
 
     def __init__(
             self, engine: Engine, md: MetaData, extended: bool = False,
@@ -177,7 +177,7 @@ class PeriodicTableDBBuilderBase(DBConnector):
 
 
 def get_atomic_nr_for_symbol(
-        db: PeriodicTableDBBuilderBase, symbol: str, conn: Connection = None
+        db: PeriodicTableDBBuilder, symbol: str, conn: Connection = None
 ) -> int | None:
     """
     Get the atomic number of an element from its symbol.
@@ -192,7 +192,7 @@ def get_atomic_nr_for_symbol(
 
 
 def get_weight_type_ids(
-        db: PeriodicTableDBBuilderBase, conn: Connection = None
+        db: PeriodicTableDBBuilder, conn: Connection = None
 ) -> dict[str, int]:
     """
     Returns a mapping of the name of the method used to determine/state the
@@ -208,7 +208,7 @@ def get_weight_type_ids(
 
 
 def get_none_weight_id(
-        db: PeriodicTableDBBuilderBase, conn: Connection = None
+        db: PeriodicTableDBBuilder, conn: Connection = None
 ) -> int:
     """
     Returns the database id of the atomic weight stated as "None".
