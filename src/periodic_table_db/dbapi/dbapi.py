@@ -37,6 +37,7 @@ class PeriodicTableDBAPI(DBConnector):
             select(self.tables["Element"].c[ATOMIC_NR])
             .where(self.tables["Element"].c[ELEM_SYMBOL] == symbol)
         )
+
         with (nullcontext(conn) if conn else self.connect()) as conn:
             atomic_nr_res = conn.execute(atomic_nr_stmt)
             return atomic_nr_res.scalar_one_or_none()
@@ -68,14 +69,18 @@ class PeriodicTableDBAPI(DBConnector):
             conn.commit()
 
     def get_ids_for_ion_symbols(
-            self, ion_symbols: list[str], conn: Connection = None
+            self, ion_symbols: str | list[str], conn: Connection = None
     ) -> dict[str, int]:
+        if isinstance(ion_symbols, str):
+            ion_symbols = [ion_symbols, ]
+
+        ion_symbol_ids_stmt = (
+            select(
+                self.tables["Ion"].c[ION_SYMBOL],
+                self.tables["Ion"].c[ION_ID]
+            ).where(self.tables["Ion"].c[ION_SYMBOL].in_(ion_symbols))
+        )
+
         with (nullcontext(conn) if conn else self.connect()) as conn:
-            ion_symbol_ids_stmt = (
-                    select(
-                        self.tables["Ion"].c[ION_SYMBOL],
-                        self.tables["Ion"].c[ION_ID]
-                    ).where(self.tables["Ion"].c[ION_SYMBOL].in_(ion_symbols))
-                )
             ion_symbol_ids_res = conn.execute(ion_symbol_ids_stmt)
             return dict(ion_symbol_ids_res.t.all())
