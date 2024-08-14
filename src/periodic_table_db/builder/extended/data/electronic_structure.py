@@ -363,24 +363,30 @@ class Atom:
 
 GROUND_STATES = {
     # Following groundstates from Housecroft & Sharp:
+    # - Period 4
+    24: "4s^{1}.3d^{5}",
     29: "4s^{1}.3d^{10}",
+    # - Period 5
     41: "5s^{1}.4d^{4}",
     42: "5s^{1}.4d^{5}",
     44: "5s^{1}.4d^{7}",
     45: "5s^{1}.4d^{8}",
     46: "5s^{0}.4d^{10}",
     47: "5s^{1}.4d^{10}",
+    # - Period 6
     57: "4f^{0}.6s^{2}.5d^{1}",
     58: "4f^{1}.6s^{2}.5d^{1}",
     64: "4f^{7}.6s^{2}.5d^{1}",
-    78: "6s^{1}.5d^{10}",
+    78: "6s^{1}.5d^{9}",
+    79: "6s^{1}.5d^{10}",
+    # - Period 7
     89: "5f^{0}.7s^{2}.6d^{1}",
     90: "5f^{0}.7s^{2}.6d^{2}",
     91: "5f^{2}.7s^{2}.6d^{1}",
     92: "5f^{3}.7s^{2}.6d^{1}",
     93: "5f^{4}.7s^{2}.6d^{1}",
     96: "5f^{7}.7s^{2}.6d^{1}",
-    # Determined by Zou & Fischer by calculation.
+    # Lu (104) determined by Zou & Fischer by calculation.
     104: "6d^{0}.7p^{1}",
     # N.B. Groundstates of 103 and beyond are based on element above in group.
     # The following are from WebElements
