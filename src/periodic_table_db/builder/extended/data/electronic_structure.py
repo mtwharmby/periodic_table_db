@@ -97,7 +97,7 @@ class SubShell:
 
     def add_electrons(self, e: int = 1):
         """
-        Add electrons to the orbitals list following the Aufbau principle.
+        Add electrons to the orbitals list following the Hund's rule.
 
         e should be a positive integer.
         """
@@ -111,7 +111,7 @@ class SubShell:
 
     def remove_electrons(self, e: int = 1):
         """
-        Remove electrons from the orbitals list following the Aufbau principle.
+        Remove electrons from the orbitals list following the Hund's rule.
 
         e should be a positive integer.
         """
@@ -174,6 +174,7 @@ class Atom:
         self.is_ion = bool(charge)
         self.labels: list[str] = []
 
+        # The following while loop is an implementation of the Aufbau principle
         pqn = 1
         while population["electrons"]:
             self.shells[pqn] = {}
@@ -182,17 +183,19 @@ class Atom:
                 self.shells[pqn][aqn] = SubShell(pqn, aqn)
 
                 if aqn == 0:
+                    # Populate s-orbitals in this shell (pqn)
                     self.shells[pqn][aqn].populate(population)
                     if pqn > 5:
-                        # Populate f-orbitals
+                        # Populate f-orbitals first (lower lying)
                         self.shells[pqn - 2][3].populate(population)
                     if pqn > 3:
-                        # Populate d-orbitals
+                        # Populate d-orbitals second
                         self.shells[pqn - 1][2].populate(population)
                 elif aqn > 1:
-                    # Don't populate f- or d-orbitals in this shell yet
+                    # Don't populate f- or d-orbitals in the current shell yet
                     continue
                 else:
+                    # Populate p-orbitals in this shell
                     self.shells[pqn][aqn].populate(population)
 
             # Shell complete, next shell
