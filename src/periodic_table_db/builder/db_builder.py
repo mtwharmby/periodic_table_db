@@ -7,12 +7,8 @@ from sqlalchemy import (
 
 from ..dbconnector import DBConnector
 from ..dbapi import PeriodicTableDBAPI
-from .shared import (
-    Element
-)
-from ..shared import (
-    Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID,
-)
+from .shared import Element
+from ..shared import Ion, ION_ID
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
     element_table, atomic_weight_table, atomic_weight_type_table, ions_table
@@ -135,99 +131,3 @@ class PeriodicTableDBBuilder(DBConnector):
             conn.commit()
 
             self.dbapi.add_ions(elements_as_ions, conn=conn)
-
-    # TODO Create a similar method to return atomic weight. This can probably
-    # be abstracted to serve both atomic weight & atomic number.
-    def get_atomic_nrs_map(
-            self, symbols: str | list[str] = None, conn: Connection = None
-    ) -> dict[str, int]:
-        """
-        Returns a dict of symbols mapped to their atomic numbers. If no atomic
-        symbols are provided, a dict of all symbols and atomic numbers in the
-        database is returned in ascending order of atomic number.
-        """
-        if isinstance(symbols, str):
-            symbols = [symbols, ]
-
-        with (nullcontext(conn) if conn else self.connect()) as conn:
-            if symbols:
-                get_stmt = (
-                    select(self.element.c[ELEM_SYMBOL],
-                           self.element.c[ATOMIC_NR])
-                    .where(self.element.c[ELEM_SYMBOL].in_(symbols))
-                )
-            else:
-                get_stmt = (
-                    select(self.element.c[ELEM_SYMBOL],
-                           self.element.c[ATOMIC_NR])
-                    .order_by(self.element.c[ATOMIC_NR].asc())
-                )
-
-            get_res = conn.execute(get_stmt)
-            return dict(get_res.t.all())
-
-    def get_atomic_nrs(
-            self, symbols: str | list[str] = None, conn: Connection = None
-    ) -> list[int]:
-        """
-        Return a list of (or a single) atomic number, depending how many atomic
-        symbols are provided as argument. If no atomic symbols are provided,
-        all atomic numbers in the database are returned in ascending order.
-        """
-        atomic_nr_map = self.get_atomic_nrs_map(symbols, conn=conn)
-        if symbols:
-            atomic_nrs = [atomic_nr_map[sym] for sym in symbols]
-            return atomic_nrs[0] if len(atomic_nrs) == 1 else atomic_nrs
-        else:
-            return [v for v in atomic_nr_map.values()]
-
-
-def get_atomic_nr_for_symbol(
-        db: PeriodicTableDBBuilder, symbol: str, conn: Connection = None
-) -> int | None:
-    """
-    Get the atomic number of an element from its symbol.
-    """
-    atomic_nr_stmt = (
-        select(db.element.c[ATOMIC_NR])
-        .where(db.element.c[ELEM_SYMBOL] == symbol)
-    )
-    with (nullcontext(conn) if conn else db.connect()) as conn:
-        atomic_nr_res = conn.execute(atomic_nr_stmt)
-        return atomic_nr_res.scalar_one_or_none()
-
-
-def get_weight_type_ids(
-        db: PeriodicTableDBBuilder, conn: Connection = None
-) -> dict[str, int]:
-    """
-    Returns a mapping of the name of the method used to determine/state the
-    atomic weight of an element to its database id.
-    """
-    weight_type_ids_stmt = (
-        select(db.atomic_weight_type.c.name, db.atomic_weight_type.c.id)
-    )
-
-    with (nullcontext(conn) if conn else db.connect()) as conn:
-        weight_type_ids_res = conn.execute(weight_type_ids_stmt)
-        return dict(weight_type_ids_res.t.all())
-
-
-def get_none_weight_id(
-        db: PeriodicTableDBBuilder, conn: Connection = None
-) -> int:
-    """
-    Returns the database id of the atomic weight stated as "None".
-    """
-    none_weight_id_stmt = (
-        select(db.atomic_weight, db.atomic_weight_type)
-        .join(db.atomic_weight_type)
-        .where(
-            db.atomic_weight.c.weight == null(),
-            db.atomic_weight_type.c.name == WEIGHT_TYPE_NONE
-        )
-    )
-
-    with (nullcontext(conn) if conn else db.connect()) as conn:
-        none_weight_id_res = conn.execute(none_weight_id_stmt)
-        return none_weight_id_res.scalar_one()
