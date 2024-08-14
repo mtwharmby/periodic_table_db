@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from collections.abc import Callable
 
 from .electronic_structure import Atom
-from ...shared import BLOCK
+from ....shared import BLOCK
 
 # TODO Add citations!
 
