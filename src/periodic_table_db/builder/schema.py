@@ -2,7 +2,7 @@ from sqlalchemy import (
     Column, Float, Integer, String, ForeignKey, Table, MetaData
 )
 
-from .shared import (
+from ..shared import (
     ATOMIC_NR, ELEM_SYMBOL, AT_WEIGHT, ION_ID, ION_SYMBOL, ION_CHARGE,
     E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP
 )

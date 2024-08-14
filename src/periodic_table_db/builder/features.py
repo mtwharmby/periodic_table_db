@@ -8,8 +8,10 @@ from bs4 import BeautifulSoup, Tag, ResultSet
 
 from .data import PERIODIC_TABLE_URL
 from .shared import (
-    WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED,
     Element, AtomicWeight
+)
+from ..shared import (
+    WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL, WEIGHT_TYPE_REPORTED
 )
 
 

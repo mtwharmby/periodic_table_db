@@ -1,11 +1,5 @@
 from dataclasses import dataclass, asdict
 
-from ..shared import (  # noqa: F401
-    ATOMIC_NR, ELEM_SYMBOL, AT_WEIGHT, WEIGHT_TYPE_NONE, WEIGHT_TYPE_INTERVAL,
-    WEIGHT_TYPE_REPORTED, ION_ID, ION_SYMBOL, ION_CHARGE, E_SHELL_STRUCT,
-    E_SUB_SHELL_STRUCT, PERIOD, GROUP, BLOCK, BLOCK_ID, LABEL, LABEL_ID
-)
-
 
 @dataclass
 class AtomicWeight:

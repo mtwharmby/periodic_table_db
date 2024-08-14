@@ -6,7 +6,7 @@ from sqlalchemy import (
 )
 
 from ..db_builder import PeriodicTableDBBuilder
-from ..shared import (
+from ...shared import (
     ATOMIC_NR, E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP, BLOCK,
     BLOCK_ID, LABEL, LABEL_ID
 )

@@ -8,9 +8,11 @@ from sqlalchemy import (
 from ..dbconnector import DBConnector
 from ..dbapi import PeriodicTableDBAPI
 from .shared import (
-    Element, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID,
+    Element
 )
-from ..shared import ion_factory
+from ..shared import (
+    ion_factory, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID,
+)
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
     element_table, atomic_weight_table, atomic_weight_type_table, ions_table
