@@ -99,13 +99,16 @@ class TestAtom:
 
     @pytest.mark.parametrize(
             "at_nr, period, group",
-            [(2, 1, 18),    # He
-             (6, 2, 14),    # C
-             (26, 4, 8),    # Fe
-             (62, 6, -1),   # Sm
-             (74, 6, 6),    # W
-             (87, 7, 1),    # Fr
-             (111, 7, 11),  # Rg
+            [(2, 1, 18),     # He
+             (6, 2, 14),     # C
+             (26, 4, 8),     # Fe
+             (51, 5, 15),    # Sb
+             (62, 6, None),  # Sm
+             (74, 6, 6),     # W
+             (79, 6, 11),    # Au
+             (87, 7, 1),     # Fr
+             (90, 7, None),  # Th
+             (111, 7, 11),   # Rg
              ])
     def test_group_period_calculation(self, at_nr, period, group):
         at = Atom(at_nr)
@@ -127,9 +130,7 @@ class TestAtom:
     @pytest.mark.parametrize(
         "at_nr, sub_shell_struct",
         [(2, "1s^{2}"),
-         # Note: this is the wrong ground state or Cu, but is correct following
-         # the rules.
-         (29, "1s^{2}.2s^{2}.2p^{6}.3s^{2}.3p^{6}.3d^{9}.4s^{2}")
+         (29, "1s^{2}.2s^{2}.2p^{6}.3s^{2}.3p^{6}.3d^{10}.4s^{1}")
          ]
     )
     def test_sub_shell_structure(self, at_nr, sub_shell_struct):
