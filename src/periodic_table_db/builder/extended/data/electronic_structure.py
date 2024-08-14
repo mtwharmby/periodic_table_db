@@ -222,6 +222,13 @@ class Atom:
             self.block = AZIMUTHAL_QUANTUM_NUMBER[self._last_aqn]
             self.period, self.group = self._calculate_period_group()
 
+        # Correct the cases where the default calculated orbital filling does
+        # not fit the rules.
+        # IMPORTANT: this must be the last step in the constructor, otherwise
+        #            group/block may be calculated wrong!
+        if self.atomic_nr in GROUND_STATES:
+            self.correct_orbital_filling(GROUND_STATES[self.atomic_nr])
+
     def _calculate_period_group(self):
         # Find the index in the sequence of the beginning of the last period
         aqn_seq = [qns[1] for qns in self._sub_shell_sequence_qns]

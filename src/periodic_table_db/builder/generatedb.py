@@ -12,7 +12,7 @@ from periodic_table_db.builder.extended import (
     ExtendedPeriodicTableDBBuilder
 )
 from periodic_table_db.builder.extended.features import (
-    get_electronic_structure, correct_ground_states, add_labels
+    get_electronic_structure, add_labels
 )
 
 
@@ -57,7 +57,6 @@ def construct_db(
     if extended:
         pt_db._add_groups_blocks()
         electronic_configs = get_electronic_structure(elements)
-        correct_ground_states(electronic_configs)
         add_labels(electronic_configs)
         pt_db.add_electronic_structure_data(electronic_configs)
 
