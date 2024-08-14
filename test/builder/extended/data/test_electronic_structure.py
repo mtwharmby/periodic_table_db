@@ -1,6 +1,8 @@
 import pytest
 
-from periodic_table_db.extended.data.electronic_structure import SubShell, Atom
+from periodic_table_db.builder.extended.data.electronic_structure import (
+    SubShell, Atom
+)
 
 
 class TestSubShell:
