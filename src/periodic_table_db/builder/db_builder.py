@@ -11,7 +11,7 @@ from .shared import (
     Element
 )
 from ..shared import (
-    ion_factory, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID,
+    Ion, WEIGHT_TYPE_NONE, ATOMIC_NR, ELEM_SYMBOL, ION_ID,
 )
 from .data import atomic_weight_types as at_weight_values
 from .schema import (
@@ -85,7 +85,7 @@ class PeriodicTableDBBuilder(DBConnector):
                     weight_values.append(weight)
 
                 # For each element add an Ion:
-                ion = ion_factory(
+                ion = Ion(
                     element_symbol=elem.symbol,
                     charge=0,
                     atomic_number=elem.atomic_number,)

@@ -1,4 +1,4 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import re
 
 ATOMIC_NR = "atomic_number"
@@ -36,20 +36,24 @@ TABLE_NAMES_EXTENDED = [
 
 @dataclass
 class Ion:
-    symbol: str
+    symbol: str = field(init=False)
+    element_symbol: str
     charge: int
     atomic_number: int | None = None
 
-    dict = asdict
+    def __post_init__(self):
+        if self.charge > 0:
+            self.symbol = f"{self.element_symbol}{abs(self.charge)}+"
+        elif self.charge < 0:
+            self.symbol = f"{self.element_symbol}{abs(self.charge)}-"
+        else:
+            self.symbol = f"{self.element_symbol}"
 
-    @property
-    def element_symbol(self):
-        symbol_parts = ion_symbol_re.match(self.symbol)
-        return symbol_parts.group(1)
+    dict = asdict
 
 
 ion_symbol_re = re.compile(
-    r"(^[A-Z][a-z]?)(?:(?:(\d+)?([+-])(\3)*)?|(?:\((I+)\))?)$"
+    r"(^[A-Z][a-z]?)(?:(?:(\d+)?([+]*|-*))|(?:\((I+)\))?)$"
 )
 
 
@@ -59,7 +63,6 @@ def parse_ion_symbol(symbol: str, atomic_nr: int = None):
         raise RuntimeError(f"Cannot parse ion symbol {symbol}")
 
     elem_symbol = symbol_parts.group(1)
-    charge = 0
     if symbol_parts.group(2) is not None:
         charge = int(symbol_parts.group(2))
         if symbol_parts.group(3) == "+":
@@ -70,26 +73,16 @@ def parse_ion_symbol(symbol: str, atomic_nr: int = None):
             raise RuntimeError(f"Cannot parse ion symbol {symbol}")
     elif symbol_parts.group(3) is not None:
         charge = len(symbol_parts.group(3))
-        if "-" in symbol_parts:
+        if "-" in symbol_parts.group(3):
             charge = -charge
+    elif symbol_parts.group(4) is not None:
+        # e.g. Fe(III) - no possibility to handle -ve charge here
+        charge = len(symbol_parts.group(4))
+    else:
+        charge = 0
 
     return {
         "element_symbol": elem_symbol,
         "charge": charge,
         "atomic_number": atomic_nr
     }
-
-
-def ion_factory(element_symbol, charge, atomic_number=None):
-    if charge > 0:
-        symbol = f"{element_symbol}{abs(charge)}+"
-    elif charge < 0:
-        symbol = f"{element_symbol}{abs(charge)}-"
-    else:
-        symbol = f"{element_symbol}"
-
-    return Ion(
-        symbol=symbol,
-        charge=charge,
-        atomic_number=atomic_number
-    )
