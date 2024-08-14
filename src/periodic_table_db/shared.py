@@ -23,10 +23,12 @@ BLOCK_ID = "id"
 LABEL = "name"
 LABEL_ID = "label_id"
 
+# Lists of names of tables (note order is important!):
+# - in the standard database
 TABLE_NAMES = [
     "Element", "AtomicWeight", "AtomicWeightType", "Ion"
 ]
-
+# - in the extended database
 TABLE_NAMES_EXTENDED = [
     "Period", "Group", "Block", "Label", "ElementLabel"
 ]

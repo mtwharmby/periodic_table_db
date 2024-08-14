@@ -4,15 +4,16 @@ from sqlalchemy import (
 
 from ..shared import (
     ATOMIC_NR, ELEM_SYMBOL, AT_WEIGHT, ION_ID, ION_SYMBOL, ION_CHARGE,
-    E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP
+    E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP,
+    TABLE_NAMES
 )
 
-TABLE_MAP = {
-    "Element": "Element",
-    "AtomicWeight": "AtomicWeight",
-    "AtomicWeightType": "AtomicWeightType",
-    "Ion": "Ion"
-}
+# TABLE_MAP = {
+#     "Element": "Element",
+#     "AtomicWeight": "AtomicWeight",
+#     "AtomicWeightType": "AtomicWeightType",
+#     "Ion": "Ion"
+# }
 
 
 def element_table(
@@ -33,12 +34,12 @@ def element_table(
         ]
         columns.extend(extra_cols)
 
-    return Table(f"{prefix}{TABLE_MAP["Element"]}", metadata_obj, *columns)
+    return Table(f"{prefix}{TABLE_NAMES[0]}", metadata_obj, *columns)
 
 
 def atomic_weight_table(metadata_obj: MetaData, prefix="", **kwargs) -> Table:
     return Table(
-        f"{prefix}{TABLE_MAP["AtomicWeight"]}",
+        f"{prefix}{TABLE_NAMES[1]}",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column(AT_WEIGHT, Float, nullable=True, unique=True),
@@ -54,7 +55,7 @@ def atomic_weight_type_table(
         metadata_obj: MetaData, prefix="", **kwargs
 ) -> Table:
     return Table(
-        f"{prefix}{TABLE_MAP["AtomicWeightType"]}",
+        f"{prefix}{TABLE_NAMES[2]}",
         metadata_obj,
         Column("id", Integer, primary_key=True),
         Column("name", String, nullable=False),
@@ -80,4 +81,4 @@ def ions_table(
         ]
         columns.extend(extra_cols)
 
-    return Table(f"{prefix}{TABLE_MAP["Ion"]}", metadata_obj, *columns)
+    return Table(f"{prefix}{TABLE_NAMES[3]}", metadata_obj, *columns)
