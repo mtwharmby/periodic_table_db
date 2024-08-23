@@ -5,6 +5,7 @@ import re
 
 import requests
 from bs4 import BeautifulSoup, Tag, ResultSet
+import requests.adapters
 
 from .data import PERIODIC_TABLE_URL
 from .shared import (
@@ -136,12 +137,22 @@ def parse_elements_text(raw_elements: list[RawElement]) -> list[Element]:
     return elements
 
 
-def get_elements(url: str = PERIODIC_TABLE_URL) -> list[Element]:
+def get_elements(
+        url: str = PERIODIC_TABLE_URL,
+        adapter_cfg: tuple[str, requests.adapters.BaseAdapter] | None = None
+) -> list[Element]:
     """
     Entry point for parsing PERIODIC_TABLE_URL website and table therein.
     Returns parsed list of elements.
     """
-    logger.info(f"Getting URL: {url}")
-    html = requests.get(url)
+    # with-statement ensures session is closed as the end, making sure we avoid
+    # leaving open sockets. See comment in `requests.api.request()` for more
+    # detail.
+    with requests.Session() as session:
+        if adapter_cfg:
+            session.mount(*adapter_cfg)
+        logger.info(f"Getting URL: {url}")
+        html = session.get(url)
+
     raw_elements = get_elements_from_html(html)
     return parse_elements_text(raw_elements)

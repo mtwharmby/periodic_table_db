@@ -40,7 +40,7 @@ def get_db_url(db_path: Path | None, interactive: bool):
 
 
 def construct_db(
-        engine: Engine, md: MetaData, extended: bool
+        engine: Engine, md: MetaData, extended: bool, **kwargs: dict
 ) -> PeriodicTableDBBuilder:
     # Initialise the database
     pt_db = (
@@ -50,7 +50,7 @@ def construct_db(
     pt_db.create_db()
 
     # Get elements from CIAAW website...
-    elements = get_elements()
+    elements = get_elements(**kwargs)
     # ... and put them in the database
     pt_db.add_elements(elements)
 
@@ -64,12 +64,13 @@ def construct_db(
 
 
 def generate_db(
-        db_path: Path = None, interactive: bool = True, extended: bool = True
+        db_path: Path = None, interactive: bool = True, extended: bool = True,
+        **kwargs: dict
 ):
     db_url = get_db_url(db_path, interactive)
     engine = create_engine(db_url)
     metadata_obj = MetaData()
-    construct_db(engine, metadata_obj, extended)
+    construct_db(engine, metadata_obj, extended, **kwargs)
     0
 
 
