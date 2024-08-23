@@ -60,7 +60,7 @@ def construct_db(
         add_labels(electronic_configs)
         pt_db.add_electronic_structure_data(electronic_configs)
 
-    return pt_db
+    return pt_db.dbapi
 
 
 def generate_db(
@@ -70,8 +70,7 @@ def generate_db(
     db_url = get_db_url(db_path, interactive)
     engine = create_engine(db_url)
     metadata_obj = MetaData()
-    construct_db(engine, metadata_obj, extended, **kwargs)
-    0
+    return construct_db(engine, metadata_obj, extended, **kwargs)
 
 
 def main(interactive=True):
