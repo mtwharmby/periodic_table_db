@@ -64,8 +64,8 @@ def construct_db(
 
 
 def generate_db(
-        db_path: Path = None, interactive: bool = True, extended: bool = True,
-        **kwargs: dict
+        db_path: Path | None = None, interactive: bool = True,
+        extended: bool = True, **kwargs: dict
 ):
     db_url = get_db_url(db_path, interactive)
     engine = create_engine(db_url)
