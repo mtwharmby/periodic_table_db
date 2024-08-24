@@ -84,6 +84,7 @@ class PeriodicTableDBBuilder(DBConnector):
                 ion = Ion(
                     element_symbol=elem.symbol,
                     charge=0,
+                    valence_state=False,
                     atomic_number=elem.atomic_number,)
                 elements_as_ions.append(ion)
 

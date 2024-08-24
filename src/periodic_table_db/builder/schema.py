@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Float, Integer, String, ForeignKey, Table, MetaData
+    Boolean, Column, Float, Integer, String, ForeignKey, Table, MetaData
 )
 
 from ..shared import (
@@ -7,13 +7,6 @@ from ..shared import (
     E_SHELL_STRUCT, E_SUB_SHELL_STRUCT, PERIOD, GROUP,
     TABLE_NAMES
 )
-
-# TABLE_MAP = {
-#     "Element": "Element",
-#     "AtomicWeight": "AtomicWeight",
-#     "AtomicWeightType": "AtomicWeightType",
-#     "Ion": "Ion"
-# }
 
 
 def element_table(
@@ -71,7 +64,8 @@ def ions_table(
         Column(ION_ID, Integer, primary_key=True),
         Column(ION_SYMBOL, String, nullable=False),
         Column(ION_CHARGE, Integer, nullable=False),
-        Column(ATOMIC_NR, Integer, ForeignKey(f"Element.{ATOMIC_NR}"))
+        Column(ATOMIC_NR, Integer, ForeignKey(f"Element.{ATOMIC_NR}")),
+        Column("valence_state", Boolean, nullable=False)
     ]
 
     if extended:
